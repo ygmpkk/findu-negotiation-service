@@ -41,7 +41,7 @@ public class UserClient {
      */
     public List<Map<String, Object>> getProviderWorks(String providerId, String authorization) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                .path("/api/v1/user/works/{userId}/public")
+                .path("/api/v1/inner/user-admin/works/{userId}/public")
                 .queryParam("type", 3)
                 .queryParam("page", 1)
                 .queryParam("pageSize", 50)
