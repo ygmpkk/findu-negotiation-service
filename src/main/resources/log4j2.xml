@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_HOME">${sys:app.log.dir:-/home/findu/logs/findu-negotiation-service}</Property>
+        <Property name="LOG_FILE_NAME">findu-negotiation-service</Property>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Property>
+        <Property name="LOG_FILE_SIZE">100MB</Property>
+        <Property name="LOG_FILE_COUNT">30</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <RollingFile name="RollingFile" fileName="${LOG_HOME}/${LOG_FILE_NAME}.log"
+                     filePattern="${LOG_HOME}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${LOG_FILE_SIZE}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${LOG_FILE_COUNT}">
+                <Delete basePath="${LOG_HOME}" maxDepth="1">
+                    <IfFileName glob="${LOG_FILE_NAME}-*.log.gz"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="ErrorFile" fileName="${LOG_HOME}/${LOG_FILE_NAME}-error.log"
+                     filePattern="${LOG_HOME}/${LOG_FILE_NAME}-error-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="${LOG_FILE_SIZE}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${LOG_FILE_COUNT}">
+                <Delete basePath="${LOG_HOME}" maxDepth="1">
+                    <IfFileName glob="${LOG_FILE_NAME}-error-*.log.gz"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <AsyncLogger name="com.findu.negotiation" level="INFO" additivity="false" includeLocation="false">
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="ErrorFile"/>
+        </AsyncLogger>
+
+        <AsyncLogger name="org.springframework" level="WARN" additivity="false" includeLocation="false">
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="ErrorFile"/>
+            <AppenderRef ref="Console"/>
+        </AsyncLogger>
+
+        <Root level="INFO">
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="ErrorFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
