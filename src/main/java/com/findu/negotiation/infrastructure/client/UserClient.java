@@ -35,10 +35,11 @@ public class UserClient {
     /**
      * 获取用户的服务列表（type=3）
      *
-     * @param providerId 服务提供者ID
+     * @param providerId    服务提供者ID
+     * @param authorization Authorization header
      * @return 服务列表，每个元素包含 worksId, title, extendInfo
      */
-    public List<Map<String, Object>> getProviderWorks(String providerId) {
+    public List<Map<String, Object>> getProviderWorks(String providerId, String authorization) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
                 .path("/api/v1/user/works/{userId}/public")
                 .queryParam("type", 3)
@@ -49,6 +50,9 @@ public class UserClient {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        if (authorization != null && !authorization.isEmpty()) {
+            headers.set("Authorization", authorization);
+        }
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 

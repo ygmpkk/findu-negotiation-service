@@ -26,11 +26,12 @@ public class NegotiationController {
             @RequestHeader(value = "Authorization", required = false) String authorization,
             @Valid @RequestBody CreateNegotiationRequest request) {
 
-        LOGGER.info("创建协商请求: providerId={}, customerId={}, demandId={}, productId={}",
+        LOGGER.info("创建协商请求: providerId={}, customerId={}, demandId={}, productId={}, authorization={}",
                 request.getProviderId(), request.getCustomerId(),
-                request.getDemandId(), request.getProductId());
+                request.getDemandId(), request.getProductId(),
+                authorization != null ? "present" : "null");
 
-        CreateNegotiationResponse response = negotiationService.createNegotiation(request);
+        CreateNegotiationResponse response = negotiationService.createNegotiation(request, authorization);
 
         return ApiResponse.success(response);
     }

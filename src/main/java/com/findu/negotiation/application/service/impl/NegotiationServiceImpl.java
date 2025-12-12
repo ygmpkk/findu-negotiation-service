@@ -27,14 +27,14 @@ public class NegotiationServiceImpl implements NegotiationService {
     }
 
     @Override
-    public CreateNegotiationResponse createNegotiation(CreateNegotiationRequest request) {
+    public CreateNegotiationResponse createNegotiation(CreateNegotiationRequest request, String authorization) {
         CreateNegotiationResponse response = new CreateNegotiationResponse();
 
         // 1. 获取title: 如果demandId存在，调用findu-dms获取description
         String title = "";
         if (request.getDemandId() != null && !request.getDemandId().isEmpty()) {
             try {
-                String description = dmsClient.getDemandDescription(request.getCustomerId(), request.getDemandId());
+                String description = dmsClient.getDemandDescription(request.getCustomerId(), request.getDemandId(), authorization);
                 if (description != null) {
                     title = description;
                 }
@@ -50,7 +50,7 @@ public class NegotiationServiceImpl implements NegotiationService {
         // 3. 获取products: 调用findu-user获取providerId的服务列表
         List<Map<String, Object>> worksList = new ArrayList<>();
         try {
-            worksList = userClient.getProviderWorks(request.getProviderId());
+            worksList = userClient.getProviderWorks(request.getProviderId(), authorization);
         } catch (Exception e) {
             LOGGER.warn("获取服务列表失败，providerId={}", request.getProviderId(), e);
         }
