@@ -4,15 +4,14 @@ import com.findu.negotiation.application.service.NegotiationService;
 import com.findu.negotiation.infrastructure.client.DmsClient;
 import com.findu.negotiation.infrastructure.client.OrderNegotiationAgentClient;
 import com.findu.negotiation.infrastructure.client.UserClient;
-import com.findu.negotiation.infrastructure.client.dto.AgentCreateNegotiationRequest;
-import com.findu.negotiation.infrastructure.client.dto.AgentCreateNegotiationResponse;
-import com.findu.negotiation.infrastructure.client.dto.AgentProductInfo;
+import com.findu.negotiation.infrastructure.client.dto.*;
 import com.findu.negotiation.infrastructure.util.PriceParser;
 import com.findu.negotiation.interfaces.request.CreateNegotiationRequest;
 import com.findu.negotiation.interfaces.response.CreateNegotiationResponse;
 import com.findu.negotiation.interfaces.response.ProductInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -22,15 +21,14 @@ public class NegotiationServiceImpl implements NegotiationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NegotiationServiceImpl.class);
 
-    private final DmsClient dmsClient;
-    private final UserClient userClient;
-    private final OrderNegotiationAgentClient agentClient;
+    @Autowired
+    private DmsClient dmsClient;
 
-    public NegotiationServiceImpl(DmsClient dmsClient, UserClient userClient, OrderNegotiationAgentClient agentClient) {
-        this.dmsClient = dmsClient;
-        this.userClient = userClient;
-        this.agentClient = agentClient;
-    }
+    @Autowired
+    private UserClient userClient;
+
+    @Autowired
+    private OrderNegotiationAgentClient agentClient;
 
     @Override
     public CreateNegotiationResponse createNegotiation(CreateNegotiationRequest request, String authorization) {

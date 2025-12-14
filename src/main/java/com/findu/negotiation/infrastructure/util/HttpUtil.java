@@ -15,6 +15,12 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * HTTP 工具包
+ *
+ * @author timothy
+ * @date 2025/12/14
+ */
 public class HttpUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtil.class);
