@@ -40,18 +40,14 @@ public class OrderNegotiationAgentClient {
     /**
      * 调用订单协商补全接口
      *
-     * @param request       订单协商补全请求
-     * @param authorization Authorization header
+     * @param request 订单协商补全请求
      * @return 订单协商补全响应
      */
-    public OrderNegotiationCompletionsResponse completions(OrderNegotiationCompletionsRequest request, String authorization) {
+    public OrderNegotiationCompletionsResponse completions(OrderNegotiationCompletionsRequest request) {
         String url = baseUrl + completionsEndpoint;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        if (authorization != null && !authorization.isEmpty()) {
-            headers.set("Authorization", authorization);
-        }
 
         HttpEntity<OrderNegotiationCompletionsRequest> httpEntity = new HttpEntity<>(request, headers);
 
