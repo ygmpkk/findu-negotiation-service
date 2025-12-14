@@ -1,6 +1,6 @@
 package com.findu.negotiation.infrastructure.client.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.alibaba.fastjson.annotation.JSONField;
 import java.util.List;
 
 /**
@@ -11,19 +11,19 @@ import java.util.List;
  */
 public class OrderNegotiationCompletionsRequest {
 
-    @JsonProperty("id")
+    @JSONField(name = "id")
     private String id;
 
-    @JsonProperty("agent_conversations")
+    @JSONField(name = "agent_conversations")
     private List<ConversationItem> agentConversations;
 
-    @JsonProperty("human_conversations")
+    @JSONField(name = "human_conversations")
     private List<ConversationItem> humanConversations;
 
-    @JsonProperty("service_card")
+    @JSONField(name = "service_card")
     private ServiceCard serviceCard;
 
-    @JsonProperty("result_schema")
+    @JSONField(name = "result_schema")
     private ResultSchema resultSchema;
 
     public OrderNegotiationCompletionsRequest() {
@@ -81,4 +81,3 @@ public class OrderNegotiationCompletionsRequest {
         this.resultSchema = resultSchema;
     }
 }
-

@@ -9,6 +9,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -25,7 +26,7 @@ public class HttpUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtil.class);
 
-    private static final MediaType JSON_MEDIA_TYPE = MediaType.get("application/json; charset=utf-8");
+    private static final MediaType JSON_MEDIA_TYPE = MediaType.get("application/json");
 
     private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
             .connectTimeout(Duration.ofSeconds(10))
@@ -36,11 +37,19 @@ public class HttpUtil {
     private HttpUtil() {
     }
 
-    public static HttpResponse postJson(String url, Object payload) throws IOException {
+    public static HttpResponse<String> postJson(String url, Object payload) {
         return postJson(url, payload, Collections.emptyMap());
     }
 
-    public static HttpResponse postJson(String url, Object payload, Map<String, String> headers) throws IOException {
+    public static HttpResponse<String> postJson(String url, Object payload, Map<String, String> headers) {
+        return postJson(url, payload, headers, String.class);
+    }
+
+    public static <T> HttpResponse<T> postJson(String url, Object payload, Class<T> responseType) {
+        return postJson(url, payload, null, responseType);
+    }
+
+    public static <T> HttpResponse<T> postJson(String url, Object payload, Map<String, String> headers, Class<T> responseType) {
         String body = payload instanceof String ? (String) payload : JSON.toJSONString(payload);
         RequestBody requestBody = RequestBody.create(body, JSON_MEDIA_TYPE);
 
@@ -57,18 +66,29 @@ public class HttpUtil {
         }
 
         Request request = requestBuilder.build();
+        LOGGER.info("request url:{}, body:{}, header:{}", url, JSON.toJSONString(payload), JSON.toJSONString(requestBuilder.getHeaders$okhttp()));
 
         try (Response response = CLIENT.newCall(request).execute()) {
             ResponseBody responseBody = response.body();
             String responseString = responseBody != null ? responseBody.string() : null;
-            return new HttpResponse(response.code(), responseString);
+
+            T parsedBody = null;
+            if (responseString != null && !responseString.isEmpty()) {
+                if (responseType == String.class) {
+                    parsedBody = responseType.cast(responseString);
+                } else {
+                    parsedBody = JSON.parseObject(responseString, responseType);
+                }
+            }
+
+            return new HttpResponse<>(response.code(), parsedBody);
         } catch (IOException e) {
             LOGGER.error("HTTP POST request failed: {}", url, e);
-            throw e;
+            return new HttpResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), null);
         }
     }
 
-    public record HttpResponse(int statusCode, String body) {
+    public record HttpResponse<T>(int statusCode, T body) {
         public boolean isSuccessful() {
             return statusCode >= 200 && statusCode < 300;
         }
