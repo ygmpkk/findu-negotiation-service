@@ -6,13 +6,11 @@ import com.findu.negotiation.infrastructure.client.dto.OrderNegotiationCompletio
 import com.findu.negotiation.infrastructure.client.dto.OrderNegotiationCompletionsResponse;
 import com.findu.negotiation.infrastructure.exception.BusinessException;
 import com.findu.negotiation.infrastructure.exception.ErrorCode;
+import com.findu.negotiation.infrastructure.util.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Order Negotiation Agent 服务客户端
@@ -25,17 +23,11 @@ import org.springframework.web.client.RestTemplate;
 public class OrderNegotiationAgentClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderNegotiationAgentClient.class);
 
-    private final RestTemplate restTemplate;
-
     @Value("${findu.order-negotiation-agent.base-url}")
     private String baseUrl;
 
     @Value("${findu.order-negotiation-agent.completions-endpoint:/api/v1/orders_negotiation/completions}")
     private String completionsEndpoint;
-
-    public OrderNegotiationAgentClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
 
     /**
      * 调用订单协商补全接口
@@ -46,11 +38,6 @@ public class OrderNegotiationAgentClient {
     public OrderNegotiationCompletionsResponse completions(OrderNegotiationCompletionsRequest request) {
         String url = baseUrl + completionsEndpoint;
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<OrderNegotiationCompletionsRequest> httpEntity = new HttpEntity<>(request, headers);
-
         try {
             LOGGER.info("调用Order Negotiation Agent Completions服务: id={}, agentConversationsCount={}, humanConversationsCount={}, serviceCardTitle={}",
                     request.getId(),
@@ -58,10 +45,10 @@ public class OrderNegotiationAgentClient {
                     request.getHumanConversations() != null ? request.getHumanConversations().size() : 0,
                     request.getServiceCard() != null ? request.getServiceCard().getTitle() : null);
 
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+            HttpUtil.HttpResponse response = HttpUtil.postJson(url, request);
 
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                JSONObject result = JSON.parseObject(response.getBody());
+            if (response.isSuccessful() && response.body() != null) {
+                JSONObject result = JSON.parseObject(response.body());
                 String code = result.getString("code");
 
                 if ("200".equals(code)) {
@@ -80,10 +67,10 @@ public class OrderNegotiationAgentClient {
                 throw new BusinessException(ErrorCode.AGENT_SERVICE_ERROR, "Agent服务返回错误: " + result.getString("message"));
             }
 
-            LOGGER.warn("Agent Completions服务返回非2xx状态码: {}", response.getStatusCode());
-            throw new BusinessException(ErrorCode.AGENT_SERVICE_ERROR, "Agent服务返回异常状态码: " + response.getStatusCode());
+            LOGGER.warn("Agent Completions服务返回非2xx状态码: {}", response.statusCode());
+            throw new BusinessException(ErrorCode.AGENT_SERVICE_ERROR, "Agent服务返回异常状态码: " + response.statusCode());
 
-        } catch (RestClientException e) {
+        } catch (Exception e) {
             LOGGER.error("调用Agent Completions服务失败", e);
             throw new BusinessException(ErrorCode.AGENT_SERVICE_ERROR, e);
         }
