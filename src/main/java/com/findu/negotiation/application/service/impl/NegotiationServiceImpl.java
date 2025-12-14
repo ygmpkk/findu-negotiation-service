@@ -59,7 +59,7 @@ public class NegotiationServiceImpl implements NegotiationService {
         );
 
         // 调用Agent服务
-        OrderNegotiationCompletionsResponse agentResponse = agentClient.completions(agentRequest, authorization);
+        OrderNegotiationCompletionsResponse agentResponse = agentClient.completions(agentRequest);
 
         // 转换为业务响应
         CreateNegotiationResponse response = new CreateNegotiationResponse();
