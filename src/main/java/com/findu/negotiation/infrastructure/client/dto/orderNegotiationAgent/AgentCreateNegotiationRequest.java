@@ -1,4 +1,4 @@
-package com.findu.negotiation.infrastructure.client.dto;
+package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
 
 /**
  * 请求协商Agent服务创建协商草案的请求体

@@ -1,9 +1,7 @@
 package com.findu.negotiation.infrastructure.client;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.findu.negotiation.infrastructure.client.dto.OrderNegotiationCompletionsRequest;
-import com.findu.negotiation.infrastructure.client.dto.OrderNegotiationCompletionsResponse;
+import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.OrderNegotiationCompletionsRequest;
+import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.OrderNegotiationCompletionsResponse;
 import com.findu.negotiation.infrastructure.exception.BusinessException;
 import com.findu.negotiation.infrastructure.exception.ErrorCode;
 import com.findu.negotiation.infrastructure.util.HttpUtil;

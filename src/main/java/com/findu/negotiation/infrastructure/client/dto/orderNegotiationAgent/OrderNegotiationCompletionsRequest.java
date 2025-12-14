@@ -1,4 +1,4 @@
-package com.findu.negotiation.infrastructure.client.dto;
+package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import java.util.List;
