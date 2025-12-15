@@ -24,7 +24,7 @@ public class OrderNegotiationAgentClient {
     @Value("${findu.order-negotiation-agent.base-url}")
     private String baseUrl;
 
-    @Value("${findu.order-negotiation-agent.completions-endpoint:/api/v1/order_negotiation/completions}")
+    @Value("${findu.order-negotiation-agent.completions-endpoint:/api/v1/inner/order_negotiation/completions}")
     private String completionsEndpoint;
 
     /**
