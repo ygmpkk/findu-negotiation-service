@@ -10,8 +10,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class ConversationItem {
 
-    @JsonProperty("role")
-    private String role;
+    @JsonProperty("sender")
+    private String sender;
 
     @JsonProperty("content")
     private String content;
@@ -22,18 +22,18 @@ public class ConversationItem {
     public ConversationItem() {
     }
 
-    public ConversationItem(String role, String content, Long timestamp) {
-        this.role = role;
+    public ConversationItem(String sender, String content, Long timestamp) {
+        this.sender = sender;
         this.content = content;
         this.timestamp = timestamp;
     }
 
-    public String getRole() {
-        return role;
+    public String getSender() {
+        return sender;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 
     public String getContent() {

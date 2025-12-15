@@ -1,6 +1,6 @@
 package com.findu.negotiation.infrastructure.util;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -34,6 +34,8 @@ public class HttpUtil {
             .writeTimeout(Duration.ofSeconds(30))
             .build();
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private HttpUtil() {
     }
 
@@ -50,7 +52,14 @@ public class HttpUtil {
     }
 
     public static <T> HttpResponse<T> postJson(String url, Object payload, Map<String, String> headers, Class<T> responseType) {
-        String body = payload instanceof String ? (String) payload : JSON.toJSONString(payload);
+        String body;
+        try {
+            body = payload instanceof String ? (String) payload : OBJECT_MAPPER.writeValueAsString(payload);
+        } catch (Exception e) {
+            LOGGER.error("Failed to serialize request payload", e);
+            return new HttpResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), null);
+        }
+        
         RequestBody requestBody = RequestBody.create(body, JSON_MEDIA_TYPE);
 
         Request.Builder requestBuilder = new Request.Builder()
@@ -66,7 +75,11 @@ public class HttpUtil {
         }
 
         Request request = requestBuilder.build();
-        LOGGER.info("request url:{}, body:{}, header:{}", url, JSON.toJSONString(payload), JSON.toJSONString(requestBuilder.getHeaders$okhttp()));
+        try {
+            LOGGER.info("request url:{}, body:{}", url, body);
+        } catch (Exception e) {
+            LOGGER.info("request url:{}", url);
+        }
 
         try (Response response = CLIENT.newCall(request).execute()) {
             ResponseBody responseBody = response.body();
@@ -77,7 +90,7 @@ public class HttpUtil {
                 if (responseType == String.class) {
                     parsedBody = responseType.cast(responseString);
                 } else {
-                    parsedBody = JSON.parseObject(responseString, responseType);
+                    parsedBody = OBJECT_MAPPER.readValue(responseString, responseType);
                 }
             }
 

@@ -13,23 +13,23 @@ public class ServiceCard {
     @JsonProperty("title")
     private String title;
 
-    @JsonProperty("description")
-    private String description;
+    @JsonProperty("content")
+    private String content;
 
     @JsonProperty("price")
-    private String price;
+    private Integer price;
 
-    @JsonProperty("works_id")
-    private String worksId;
+    @JsonProperty("product_id")
+    private String productId;
 
     public ServiceCard() {
     }
 
-    public ServiceCard(String title, String description, String price, String worksId) {
+    public ServiceCard(String title, String content, Integer price, String productId) {
         this.title = title;
-        this.description = description;
+        this.content = content;
         this.price = price;
-        this.worksId = worksId;
+        this.productId = productId;
     }
 
     public String getTitle() {
@@ -40,28 +40,28 @@ public class ServiceCard {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
+    public String getContent() {
+        return content;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setContent(String content) {
+        this.content = content;
     }
 
-    public String getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
 
-    public String getWorksId() {
-        return worksId;
+    public String getProductId() {
+        return productId;
     }
 
-    public void setWorksId(String worksId) {
-        this.worksId = worksId;
+    public void setProductId(String productId) {
+        this.productId = productId;
     }
 }
 

@@ -117,10 +117,11 @@ public class NegotiationServiceImpl implements NegotiationService {
                 for (Map<String, Object> work : worksList) {
                     String worksId = (String) work.get("worksId");
                     if (request.getProductId().equals(worksId)) {
-                        serviceCard.setWorksId(worksId);
+                        serviceCard.setProductId(worksId);
                         serviceCard.setTitle((String) work.get("title"));
-                        serviceCard.setDescription((String) work.get("description"));
-                        serviceCard.setPrice(extractExpectedPrice(work));
+                        serviceCard.setContent((String) work.get("description"));
+                        String priceStr = extractExpectedPrice(work);
+                        serviceCard.setPrice(priceStr != null ? PriceParser.parseToCents(priceStr) : 0);
                         break;
                     }
                 }
@@ -133,11 +134,11 @@ public class NegotiationServiceImpl implements NegotiationService {
         if (serviceCard.getTitle() == null) {
             serviceCard.setTitle("");
         }
-        if (serviceCard.getDescription() == null) {
-            serviceCard.setDescription("");
+        if (serviceCard.getContent() == null) {
+            serviceCard.setContent("");
         }
         if (serviceCard.getPrice() == null) {
-            serviceCard.setPrice("0");
+            serviceCard.setPrice(0);
         }
 
         return serviceCard;
