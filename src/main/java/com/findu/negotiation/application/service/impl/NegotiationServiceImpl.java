@@ -115,24 +115,39 @@ public class NegotiationServiceImpl implements NegotiationService {
     private ServiceCard buildServiceCard(CreateNegotiationRequest request, String authorization) {
         ServiceCard serviceCard = new ServiceCard();
 
+        LOGGER.info("构建服务卡信息: providerId={}, productId={}", request.getProviderId(), request.getProductId());
+
         // 如果有productId，从userClient获取服务信息
         if (request.getProductId() != null && !request.getProductId().isEmpty()) {
             try {
                 List<Map<String, Object>> worksList = userClient.getProviderWorks(request.getProviderId(), authorization);
+                LOGGER.info("获取到worksList: size={}, 目标productId={}", worksList.size(), request.getProductId());
+                
+                boolean found = false;
                 for (Map<String, Object> work : worksList) {
                     String worksId = (String) work.get("worksId");
+                    LOGGER.debug("遍历work: worksId={}, title={}", worksId, work.get("title"));
                     if (request.getProductId().equals(worksId)) {
                         serviceCard.setProductId(worksId);
                         serviceCard.setTitle((String) work.get("title"));
                         serviceCard.setContent((String) work.get("description"));
                         String priceStr = extractExpectedPrice(work);
                         serviceCard.setPrice(priceStr != null ? PriceParser.parseToCents(priceStr) : 0);
+                        found = true;
+                        LOGGER.info("找到匹配的服务: worksId={}, title={}, price={}", worksId, serviceCard.getTitle(), serviceCard.getPrice());
                         break;
                     }
+                }
+                if (!found) {
+                    LOGGER.warn("未找到匹配的productId: productId={}, worksList中的worksId列表={}", 
+                            request.getProductId(), 
+                            worksList.stream().map(w -> (String) w.get("worksId")).toList());
                 }
             } catch (Exception e) {
                 LOGGER.warn("获取服务卡信息失败，productId={}", request.getProductId(), e);
             }
+        } else {
+            LOGGER.warn("productId为空，无法获取服务卡信息");
         }
 
         // 设置默认值
@@ -145,6 +160,14 @@ public class NegotiationServiceImpl implements NegotiationService {
         if (serviceCard.getPrice() == null) {
             serviceCard.setPrice(0);
         }
+        // 确保 productId 不为 null（Python端要求必填）
+        if (serviceCard.getProductId() == null) {
+            serviceCard.setProductId(request.getProductId() != null ? request.getProductId() : "");
+            LOGGER.info("设置默认productId: {}", serviceCard.getProductId());
+        }
+
+        LOGGER.info("服务卡信息构建完成: productId={}, title={}, content={}, price={}", 
+                serviceCard.getProductId(), serviceCard.getTitle(), serviceCard.getContent(), serviceCard.getPrice());
 
         return serviceCard;
     }

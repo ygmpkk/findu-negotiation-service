@@ -85,13 +85,22 @@ public class HttpUtil {
             ResponseBody responseBody = response.body();
             String responseString = responseBody != null ? responseBody.string() : null;
 
+            LOGGER.info("HTTP响应: statusCode={}, body={}", response.code(), responseString);
+
             T parsedBody = null;
-            if (responseString != null && !responseString.isEmpty()) {
+            // 只有在成功状态码时才尝试解析响应体为目标类型
+            if (response.isSuccessful() && responseString != null && !responseString.isEmpty()) {
                 if (responseType == String.class) {
                     parsedBody = responseType.cast(responseString);
                 } else {
-                    parsedBody = OBJECT_MAPPER.readValue(responseString, responseType);
+                    try {
+                        parsedBody = OBJECT_MAPPER.readValue(responseString, responseType);
+                    } catch (Exception e) {
+                        LOGGER.warn("解析响应体失败: {}", responseString, e);
+                    }
                 }
+            } else if (!response.isSuccessful()) {
+                LOGGER.warn("HTTP请求失败: statusCode={}, response={}", response.code(), responseString);
             }
 
             return new HttpResponse<>(response.code(), parsedBody);
