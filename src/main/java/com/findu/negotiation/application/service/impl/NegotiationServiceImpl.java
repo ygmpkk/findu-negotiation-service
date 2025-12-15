@@ -35,7 +35,12 @@ public class NegotiationServiceImpl implements NegotiationService {
 
     @Override
     public CreateNegotiationResponse createNegotiation(CreateNegotiationRequest request, String authorization) {
-        return createNegotiationWithAgent(request, authorization);
+        try {
+            return createNegotiationWithAgent(request, authorization);
+        } catch (Exception e) {
+            LOGGER.warn("Agent服务调用失败，降级到手动逻辑: {}", e.getMessage(), e);
+            return createNegotiationManually(request, authorization);
+        }
     }
 
     /**
