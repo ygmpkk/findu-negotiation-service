@@ -78,8 +78,9 @@ public class NegotiationServiceImpl implements NegotiationService {
 
             // 转换产品列表
             Object productsObj = result.get("products");
-            if (productsObj instanceof List) {
-                List<ProductInfo> products = new ArrayList<>();
+            List<ProductInfo> products = new ArrayList<>();
+            if (productsObj instanceof List && !((List<?>) productsObj).isEmpty()) {
+                // Agent 返回了 products，使用 Agent 的结果
                 for (Object item : (List<?>) productsObj) {
                     if (item instanceof Map) {
                         Map<?, ?> productMap = (Map<?, ?>) item;
@@ -90,10 +91,28 @@ public class NegotiationServiceImpl implements NegotiationService {
                         ));
                     }
                 }
-                response.setProducts(products);
+                LOGGER.info("使用Agent返回的products: count={}", products.size());
             } else {
-                response.setProducts(new ArrayList<>());
+                // Agent 返回的 products 为空，从 User 服务获取 worksList 并构建 products
+                LOGGER.info("Agent返回的products为空，从User服务获取worksList构建products");
+                try {
+                    List<Map<String, Object>> worksList = userClient.getProviderWorks(request.getProviderId(), authorization);
+                    String selectedProductId = request.getProductId();
+                    LOGGER.info("从User服务获取worksList: size={}, 选中的productId={}", worksList.size(), selectedProductId);
+                    
+                    for (Map<String, Object> work : worksList) {
+                        String worksId = (String) work.get("worksId");
+                        String workTitle = (String) work.get("title");
+                        boolean isSelected = worksId != null && worksId.equals(selectedProductId);
+                        products.add(new ProductInfo(worksId, workTitle, isSelected));
+                        LOGGER.debug("添加product: worksId={}, title={}, isSelected={}", worksId, workTitle, isSelected);
+                    }
+                    LOGGER.info("从worksList构建products完成: count={}", products.size());
+                } catch (Exception e) {
+                    LOGGER.warn("从User服务获取worksList失败，products为空", e);
+                }
             }
+            response.setProducts(products);
         } else {
             // 如果result为空，返回默认值
             response.setTitle("");
