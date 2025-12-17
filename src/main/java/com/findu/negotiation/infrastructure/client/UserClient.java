@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
@@ -23,23 +22,46 @@ public class UserClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserClient.class);
 
-    private final RestTemplate restTemplate;
+    private final HttpClientWrapper httpClientWrapper;
 
     @Value("${findu.user.base-url}")
     private String baseUrl;
 
-    public UserClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public UserClient(HttpClientWrapper httpClientWrapper) {
+        this.httpClientWrapper = httpClientWrapper;
+    }
+
+    /**
+     * 获取用户的服务列表（type=3）（自动透传Authorization header）
+     *
+     * @param providerId 服务提供者ID
+     * @return 服务列表，每个元素包含 worksId, title, extendInfo
+     */
+    public List<Map<String, Object>> getProviderWorks(String providerId) {
+        return getProviderWorks(providerId, true);
+    }
+
+    /**
+     * 获取用户的服务列表（type=3）（兼容旧接口）
+     *
+     * @param providerId    服务提供者ID
+     * @param authorization Authorization header（此参数已废弃，使用RequestContext自动透传）
+     * @return 服务列表，每个元素包含 worksId, title, extendInfo
+     * @deprecated 使用 getProviderWorks(String providerId) 代替
+     */
+    @Deprecated
+    public List<Map<String, Object>> getProviderWorks(String providerId, String authorization) {
+        return getProviderWorks(providerId, true);
     }
 
     /**
      * 获取用户的服务列表（type=3）
      *
-     * @param providerId    服务提供者ID
-     * @param authorization Authorization header
+     * @param providerId        服务提供者ID
+     * @param passAuthorization 是否透传Authorization header
      * @return 服务列表，每个元素包含 worksId, title, extendInfo
      */
-    public List<Map<String, Object>> getProviderWorks(String providerId, String authorization) {
+    public List<Map<String, Object>> getProviderWorks(String providerId, boolean passAuthorization) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrl)
                 .path("/api/v1/inner/user-admin/works/{userId}/public")
                 .queryParam("type", 3)
@@ -48,17 +70,11 @@ public class UserClient {
                 .buildAndExpand(providerId)
                 .toUriString();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        if (authorization != null && !authorization.isEmpty()) {
-            headers.set("Authorization", authorization);
-        }
-
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-
         try {
-            LOGGER.info("调用User服务获取产品列表: providerId={}, url={}", providerId, url);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+            LOGGER.info("调用User服务获取产品列表: providerId={}, url={}, passAuthorization={}",
+                    providerId, url, passAuthorization);
+
+            ResponseEntity<String> response = httpClientWrapper.get(url, String.class, passAuthorization);
 
             LOGGER.info("User服务响应: statusCode={}, body={}", response.getStatusCode(), response.getBody());
 

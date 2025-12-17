@@ -5,5 +5,8 @@ import com.findu.negotiation.interfaces.response.CreateNegotiationResponse;
 
 public interface NegotiationService {
 
-    CreateNegotiationResponse createNegotiation(CreateNegotiationRequest request, String authorization);
+    /**
+     * 创建协商草案（从RequestContext自动获取Authorization）
+     */
+    CreateNegotiationResponse createNegotiation(CreateNegotiationRequest request);
 }

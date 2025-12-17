@@ -34,23 +34,23 @@ public class NegotiationServiceImpl implements NegotiationService {
     private OrderNegotiationAgentClient agentClient;
 
     @Override
-    public CreateNegotiationResponse createNegotiation(CreateNegotiationRequest request, String authorization) {
+    public CreateNegotiationResponse createNegotiation(CreateNegotiationRequest request) {
         try {
-            return createNegotiationWithAgent(request, authorization);
+            return createNegotiationWithAgent(request);
         } catch (Exception e) {
             LOGGER.warn("Agent服务调用失败，降级到手动逻辑: {}", e.getMessage(), e);
-            return createNegotiationManually(request, authorization);
+            return createNegotiationManually(request);
         }
     }
 
     /**
      * 使用Agent服务创建协商草案
      */
-    private CreateNegotiationResponse createNegotiationWithAgent(CreateNegotiationRequest request, String authorization) {
+    private CreateNegotiationResponse createNegotiationWithAgent(CreateNegotiationRequest request) {
         LOGGER.info("使用Agent Completions服务创建协商草案");
 
         // 构建服务卡信息
-        ServiceCard serviceCard = buildServiceCard(request, authorization);
+        ServiceCard serviceCard = buildServiceCard(request);
 
         // 构建结果Schema
         ResultSchema resultSchema = buildResultSchema();
@@ -96,7 +96,7 @@ public class NegotiationServiceImpl implements NegotiationService {
                 // Agent 返回的 products 为空，从 User 服务获取 worksList 并构建 products
                 LOGGER.info("Agent返回的products为空，从User服务获取worksList构建products");
                 try {
-                    List<Map<String, Object>> worksList = userClient.getProviderWorks(request.getProviderId(), authorization);
+                    List<Map<String, Object>> worksList = userClient.getProviderWorks(request.getProviderId());
                     String selectedProductId = request.getProductId();
                     LOGGER.info("从User服务获取worksList: size={}, 选中的productId={}", worksList.size(), selectedProductId);
                     
@@ -131,7 +131,7 @@ public class NegotiationServiceImpl implements NegotiationService {
     /**
      * 构建服务卡信息
      */
-    private ServiceCard buildServiceCard(CreateNegotiationRequest request, String authorization) {
+    private ServiceCard buildServiceCard(CreateNegotiationRequest request) {
         ServiceCard serviceCard = new ServiceCard();
 
         LOGGER.info("构建服务卡信息: providerId={}, productId={}", request.getProviderId(), request.getProductId());
@@ -139,7 +139,7 @@ public class NegotiationServiceImpl implements NegotiationService {
         // 如果有productId，从userClient获取服务信息
         if (request.getProductId() != null && !request.getProductId().isEmpty()) {
             try {
-                List<Map<String, Object>> worksList = userClient.getProviderWorks(request.getProviderId(), authorization);
+                List<Map<String, Object>> worksList = userClient.getProviderWorks(request.getProviderId());
                 LOGGER.info("获取到worksList: size={}, 目标productId={}", worksList.size(), request.getProductId());
                 
                 boolean found = false;
@@ -257,7 +257,7 @@ public class NegotiationServiceImpl implements NegotiationService {
     /**
      * 手动创建协商草案（原有逻辑）
      */
-    private CreateNegotiationResponse createNegotiationManually(CreateNegotiationRequest request, String authorization) {
+    private CreateNegotiationResponse createNegotiationManually(CreateNegotiationRequest request) {
         LOGGER.info("使用手动逻辑创建协商草案");
         CreateNegotiationResponse response = new CreateNegotiationResponse();
 
@@ -265,7 +265,7 @@ public class NegotiationServiceImpl implements NegotiationService {
         String title = "";
         if (request.getDemandId() != null && !request.getDemandId().isEmpty()) {
             try {
-                String description = dmsClient.getDemandDescription(request.getCustomerId(), request.getDemandId(), authorization);
+                String description = dmsClient.getDemandDescription(request.getCustomerId(), request.getDemandId());
                 if (description != null) {
                     title = description;
                 }
@@ -281,7 +281,7 @@ public class NegotiationServiceImpl implements NegotiationService {
         // 3. 获取products: 调用findu-user获取providerId的服务列表
         List<Map<String, Object>> worksList = new ArrayList<>();
         try {
-            worksList = userClient.getProviderWorks(request.getProviderId(), authorization);
+            worksList = userClient.getProviderWorks(request.getProviderId());
         } catch (Exception e) {
             LOGGER.warn("获取服务列表失败，providerId={}", request.getProviderId(), e);
         }

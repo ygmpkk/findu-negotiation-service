@@ -23,15 +23,13 @@ public class NegotiationController {
 
     @PostMapping("/create")
     public ApiResponse<CreateNegotiationResponse> create(
-            @RequestHeader(value = "Authorization", required = false) String authorization,
             @Valid @RequestBody CreateNegotiationRequest request) {
 
-        LOGGER.info("创建协商请求: providerId={}, customerId={}, demandId={}, productId={}, authorization={}",
+        LOGGER.info("创建协商请求: providerId={}, customerId={}, demandId={}, productId={}",
                 request.getProviderId(), request.getCustomerId(),
-                request.getDemandId(), request.getProductId(),
-                authorization != null ? "present" : "null");
+                request.getDemandId(), request.getProductId());
 
-        CreateNegotiationResponse response = negotiationService.createNegotiation(request, authorization);
+        CreateNegotiationResponse response = negotiationService.createNegotiation(request);
 
         return ApiResponse.success(response);
     }

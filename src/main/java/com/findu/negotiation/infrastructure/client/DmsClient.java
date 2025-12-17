@@ -9,53 +9,57 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class DmsClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DmsClient.class);
 
-    private final RestTemplate restTemplate;
+    private final HttpClientWrapper httpClientWrapper;
 
     @Value("${findu.dms.base-url}")
     private String baseUrl;
 
-    public DmsClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public DmsClient(HttpClientWrapper httpClientWrapper) {
+        this.httpClientWrapper = httpClientWrapper;
+    }
+
+    /**
+     * 获取需求详情（自动透传Authorization header）
+     *
+     * @param userId   用户ID (customerId)
+     * @param demandId 需求ID
+     * @return 需求描述 (作为title使用)
+     */
+    public String getDemandDescription(String userId, String demandId) {
+        return getDemandDescription(userId, demandId, true);
     }
 
     /**
      * 获取需求详情
      *
-     * @param userId         用户ID (customerId)
-     * @param demandId       需求ID
-     * @param authorization  Authorization header
+     * @param userId            用户ID (customerId)
+     * @param demandId          需求ID
+     * @param passAuthorization 是否透传Authorization header
      * @return 需求描述 (作为title使用)
      */
-    public String getDemandDescription(String userId, String demandId, String authorization) {
+    public String getDemandDescription(String userId, String demandId, boolean passAuthorization) {
         String url = baseUrl + "/api/v1/inner/demand/detail";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        if (authorization != null && !authorization.isEmpty()) {
-            headers.set("Authorization", authorization);
-        } else {
-            headers.set("Authorization", "Bearer " + userId);
-        }
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("userId", userId);
-        params.add("demandId", demandId);
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        Map<String, String> formParams = new HashMap<>();
+        formParams.put("userId", userId);
+        formParams.put("demandId", demandId);
 
         try {
-            LOGGER.info("调用DMS服务获取需求详情: userId={}, demandId={}", userId, demandId);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+            LOGGER.info("调用DMS服务获取需求详情: userId={}, demandId={}, passAuthorization={}",
+                    userId, demandId, passAuthorization);
+
+            ResponseEntity<String> response = httpClientWrapper.postForm(
+                    url, formParams, String.class, passAuthorization);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 JSONObject result = JSON.parseObject(response.getBody());
