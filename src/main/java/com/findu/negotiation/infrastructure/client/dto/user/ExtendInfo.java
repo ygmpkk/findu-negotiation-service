@@ -23,13 +23,10 @@ public class ExtendInfo {
     /**
      * 预期价格，示例：300元\/小时
      */
-    @JsonProperty("expected_price")
     public String expectedPrice;
 
-    @JsonProperty("service_location")
     public String serviceLocation;
 
-    @JsonProperty("service_method")
     public String serviceMethod;
 
     /**
