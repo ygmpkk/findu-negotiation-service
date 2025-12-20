@@ -10,6 +10,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -159,6 +160,7 @@ public class HttpClientWrapper {
      */
     private HttpHeaders buildHeaders(Map<String, String> additionalHeaders, boolean passAuthorization) {
         HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         // 透传Authorization header
         if (passAuthorization) {
