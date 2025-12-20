@@ -51,6 +51,7 @@ public class CreateNegotiationResponse {
         CreateNegotiationResponse response = new CreateNegotiationResponse();
         response.setTitle(entity.getTitle());
         response.setContent(entity.getContent());
+        response.setProducts(entity.getProducts());
         response.setPrice(entity.getPrice());
         response.setGmtCreate(entity.getGmtCreate());
         response.setGmtModify(entity.getGmtModify());
