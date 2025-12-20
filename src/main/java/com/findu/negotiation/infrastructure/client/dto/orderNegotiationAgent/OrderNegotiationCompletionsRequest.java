@@ -1,6 +1,8 @@
 package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.findu.negotiation.domain.vo.NegotiationResultSchemaVO;
+import com.findu.negotiation.domain.vo.ProductInfoVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,9 +31,8 @@ public class OrderNegotiationCompletionsRequest {
     @JsonProperty("human_conversations")
     private List<ConversationItem> humanConversations;
 
-    @JsonProperty("service_card")
-    private ServiceCard serviceCard;
+    private List<ProductInfoVO> products;
 
     @JsonProperty("result_schema")
-    private ResultSchema resultSchema;
+    private NegotiationResultSchemaVO resultSchema;
 }

@@ -39,6 +39,9 @@ public class NegotiationController {
         } catch (BusinessException e) {
             LOGGER.error("创建协商失败，系统错误", e);
             return ApiResponse.error(e.getCode(), e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("创建协商失败，未知错误", e);
+            return ApiResponse.error(ErrorCode.INTERNAL_ERROR.getCode(), "创建协商异常，请稍后重试");
         }
     }
 }

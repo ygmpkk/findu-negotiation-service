@@ -1,6 +1,5 @@
 package com.findu.negotiation.infrastructure.client.dto.user;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.findu.negotiation.infrastructure.util.PriceParser;
 import lombok.AllArgsConstructor;
@@ -35,7 +34,7 @@ public class ExtendInfo {
      * 获取解析后的价格，单位分
      * @return 价格
      */
-    private int getParsedPrice() {
+    public int getParsedPrice() {
         if (expectedPrice == null) {
             return 0;
         }

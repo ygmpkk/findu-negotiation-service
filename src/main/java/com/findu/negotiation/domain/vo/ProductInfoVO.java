@@ -23,6 +23,16 @@ public class ProductInfoVO {
     private String title;
 
     /**
+     * 描述
+     */
+    public String description;
+
+    /**
+     * 价格，单位分
+     */
+    private int price;
+
+    /**
      * 是否选择
      */
     @JsonProperty("is_selected")

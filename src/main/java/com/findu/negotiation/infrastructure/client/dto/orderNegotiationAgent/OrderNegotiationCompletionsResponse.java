@@ -1,12 +1,11 @@
 package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.findu.negotiation.domain.vo.NegotiationResultVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import java.util.Map;
 
 /**
  * Order Negotiation Completions 响应体
@@ -24,6 +23,6 @@ public class OrderNegotiationCompletionsResponse {
     private String id;
 
     @JsonProperty("result")
-    private Map<String, Object> result;
+    private NegotiationResultVO result;
 }
 

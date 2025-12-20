@@ -1,8 +1,6 @@
 package com.findu.negotiation.infrastructure.client.dto.user;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.List;
@@ -16,5 +14,5 @@ import java.util.List;
 @ToString
 @Data
 public class ProviderData {
-    private List<ProviderServiceCard> items;
+    private List<ProviderProduct> items;
 }

@@ -1,20 +1,20 @@
 package com.findu.negotiation.application;
 
 import com.findu.negotiation.domain.entity.NegotiationEntity;
-import com.findu.negotiation.domain.vo.ProductInfoSchemaVO;
+import com.findu.negotiation.domain.vo.NegotiationResultSchemaVO;
+import com.findu.negotiation.domain.vo.NegotiationResultVO;
 import com.findu.negotiation.domain.vo.ProductInfoVO;
+import com.findu.negotiation.infrastructure.client.ChatClient;
 import com.findu.negotiation.infrastructure.client.DmsClient;
 import com.findu.negotiation.infrastructure.client.OrderNegotiationAgentClient;
 import com.findu.negotiation.infrastructure.client.UserClient;
+import com.findu.negotiation.infrastructure.client.dto.chat.ChatHistoryResponse;
+import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.ConversationItem;
 import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.OrderNegotiationCompletionsRequest;
 import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.OrderNegotiationCompletionsResponse;
-import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.ResultSchema;
 import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.ServiceCard;
-import com.findu.negotiation.infrastructure.client.dto.user.ProviderServiceCard;
+import com.findu.negotiation.infrastructure.client.dto.user.ProviderProduct;
 import com.findu.negotiation.infrastructure.util.PriceParser;
-import com.findu.negotiation.interfaces.dto.CreateNegotiationRequest;
-import com.findu.negotiation.interfaces.dto.CreateNegotiationResponse;
-import com.findu.negotiation.interfaces.dto.ProductInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +34,8 @@ public class NegotiationBizServiceImpl implements NegotiationBizService {
 
     @Autowired
     private OrderNegotiationAgentClient agentClient;
+    @Autowired
+    private ChatClient chatClient;
 
     @Override
     public NegotiationEntity createNegotiation(String providerId, String customerId, String demandId, String productId) {
@@ -47,7 +49,7 @@ public class NegotiationBizServiceImpl implements NegotiationBizService {
             return createNegotiationWithAgent(entity);
         } catch (Exception e) {
             LOGGER.warn("Agent服务调用失败，降级到手动逻辑: {}", e.getMessage(), e);
-            return createNegotiationManually(entity);
+            return buildNormalResult(entity, null);
         }
     }
 
@@ -58,81 +60,77 @@ public class NegotiationBizServiceImpl implements NegotiationBizService {
         LOGGER.info("使用Agent Completions服务创建协商草案");
 
         // 1. 获取provider的服务卡片
-        List<ProviderServiceCard> serviceCards = userClient.getProviderWorks(entity.getProviderId());
+        List<ProviderProduct> providerWorks = userClient.getProviderWorks(entity.getProviderId());
+        List<ProductInfoVO> productInfoVOS = new ArrayList<>();
+        for (ProviderProduct product : providerWorks) {
+            ProductInfoVO productInfoVO = new ProductInfoVO();
+            productInfoVO.setId(product.getWorksId());
+            productInfoVO.setTitle(product.getTitle());
+            productInfoVO.setDescription(product.getDescription());
+            productInfoVO.setPrice(product.getExtendInfo().getParsedPrice());
+            productInfoVOS.add(productInfoVO);
+        }
 
-        // 2. 获取 customer agent 历史对话
+        // 2. TODO 获取 customer agent 历史对话
         // 获取用户的需求
 
         // 3. 获取 IM 历史对话
         // 获取用户和服务方的协商条款
+        ChatHistoryResponse chatHistoryResponse = chatClient.getChatHistory(entity.getProviderId(), entity.getCustomerId());
+        List<ConversationItem> humanConversations = new ArrayList<>();
+        if (chatHistoryResponse != null && chatHistoryResponse.getData() != null) {
+            for (var msg : chatHistoryResponse.getData().getMessages()) {
+                ConversationItem item = new ConversationItem();
+                item.setTimestamp(msg.getMsgTime());
+                item.setSender(Objects.equals(msg.getFrom(), entity.getProviderId()) ? "服务方" : "用户");
+
+                for (var content : msg.getContent()) {
+                    if (content.isTextContent()) {
+                        item.setContent(content.getContentAsText());
+                        break;
+                    }
+                }
+                humanConversations.add(item);
+            }
+        }
+
 
         // 4. 调用Agent，根据对话选取最合适的服务 product
 
-        ServiceCard serviceCard = buildServiceCard(entity);
-
         // 构建结果Schema
-        ResultSchema resultSchema = buildResultSchema();
+        NegotiationResultSchemaVO resultSchemaVO = NegotiationResultSchemaVO.buildDefault();
 
         // 构造Agent请求 (暂时使用空对话列表，后续可从IM系统获取)
         OrderNegotiationCompletionsRequest agentRequest = new OrderNegotiationCompletionsRequest(
                 UUID.randomUUID().toString(), // 生成唯一请求ID
-                new ArrayList<>(), // agent_conversations - 从需求对话获取
-                new ArrayList<>(), // human_conversations - 从IM对话获取
-                serviceCard,
-                resultSchema
+                // agent_conversations - 从需求对话获取
+                new ArrayList<>(),
+                // human_conversations - 从IM对话获取
+                humanConversations,
+                productInfoVOS,
+                resultSchemaVO
         );
 
         // 调用Agent服务
         OrderNegotiationCompletionsResponse agentResponse = agentClient.completions(agentRequest);
 
-        // 转换为业务响应
-        Map<String, Object> result = agentResponse.getResult();
-        if (result != null) {
-            entity.setTitle((String) result.getOrDefault("title", ""));
-            entity.setPrice(parsePrice(result.get("price")));
-            entity.setContent((Map<String, Object>) result.getOrDefault("content", new HashMap<>()));
-
-            // 转换产品列表
-            Object productsObj = result.get("products");
-            List<ProductInfoVO> products = new ArrayList<>();
-            if (productsObj instanceof List && !((List<?>) productsObj).isEmpty()) {
-                // Agent 返回了 products，使用 Agent 的结果
-                for (Object item : (List<?>) productsObj) {
-                    if (item instanceof Map) {
-                        Map<?, ?> productMap = (Map<?, ?>) item;
-                        products.add(new ProductInfoVO(
-                                (String) productMap.get("id"),
-                                (String) productMap.get("title"),
-                                Boolean.TRUE.equals(productMap.get("is_selected"))
-                        ));
-                    }
-                }
-                LOGGER.info("使用Agent返回的products: count={}", products.size());
-            } else {
-                // Agent 返回的 products 为空，从 User 服务获取 worksList 并构建 products
-                LOGGER.info("Agent返回的products为空，从User服务获取worksList构建products");
-                try {
-                    List<ProviderServiceCard> worksList = userClient.getProviderWorks(entity.getProviderId());
-                    String selectedProductId = entity.getProductId();
-                    LOGGER.info("从User服务获取worksList: size={}, 选中的productId={}", worksList.size(), selectedProductId);
-                    
-                    for (ProviderServiceCard work : worksList) {
-                        boolean isSelected = work.getWorksId() != null && work.getWorksId().equals(selectedProductId);
-                        products.add(new ProductInfoVO(work.getWorksId(), work.getTitle(), isSelected));
-                    }
-                    LOGGER.info("从worksList构建products完成: count={}", products.size());
-                } catch (Exception e) {
-                    LOGGER.warn("从User服务获取worksList失败，products为空", e);
-                }
-            }
-            entity.setProducts(products);
-        } else {
-            // 如果result为空，返回默认值
-            entity.setTitle("");
-            entity.setPrice(0);
-            entity.setContent(new HashMap<>());
-            entity.setProducts(new ArrayList<>());
+        if (null == agentResponse.getResult()) {
+            // 如果Agent返回空，使用默认的降级逻辑
+            return buildNormalResult(entity, productInfoVOS);
         }
+
+        entity.setTitle(agentResponse.getResult().getTitle());
+        entity.setContent(agentResponse.getResult().getContent());
+
+        for (ProductInfoVO product : agentResponse.getResult().getProducts()) {
+            // 找到和 productInfoVOS匹配的 id
+            if (productInfoVOS.stream().anyMatch(p -> p.getId().equals(product.getId()))) {
+                product.setSelected(true);
+                break;
+            }
+        }
+        entity.setProducts(productInfoVOS);
+        entity.setPrice(agentResponse.getResult().getPrice());
 
         LOGGER.info("Agent Completions服务创建协商成功: title={}, price={}, productsCount={}",
                 entity.getTitle(), entity.getPrice(),
@@ -141,168 +139,13 @@ public class NegotiationBizServiceImpl implements NegotiationBizService {
         return entity;
     }
 
-    /**
-     * 构建服务卡信息
-     */
-    private ServiceCard buildServiceCard(NegotiationEntity entity) {
-        List<ProviderServiceCard> worksList = userClient.getProviderWorks(entity.getProviderId());
-        LOGGER.info("构建服务卡信息: providerId={}, worksList={}", entity.getProviderId(), worksList);
-
-        ServiceCard serviceCard = new ServiceCard();
-
-
-
-        // 设置默认值
-        if (serviceCard.getTitle() == null) {
-            serviceCard.setTitle("");
+    private NegotiationEntity buildNormalResult(NegotiationEntity entity, List<ProductInfoVO> productInfoVOS) {
+        // 降级默认使用第一个产品
+        if (null != productInfoVOS && !productInfoVOS.isEmpty()) {
+            entity.setPrice(productInfoVOS.getFirst().getPrice());
+            entity.getProducts().getFirst().setSelected(true);
         }
-        if (serviceCard.getContent() == null) {
-            serviceCard.setContent("");
-        }
-        if (serviceCard.getPrice() == null) {
-            serviceCard.setPrice(0);
-        }
-        // 确保 productId 不为 null（Python端要求必填）
-        if (serviceCard.getProductId() == null) {
-            serviceCard.setProductId(entity.getProductId() != null ? entity.getProductId() : "");
-            LOGGER.info("设置默认productId: {}", serviceCard.getProductId());
-        }
-
-        LOGGER.info("服务卡信息构建完成: productId={}, title={}, content={}, price={}", 
-                serviceCard.getProductId(), serviceCard.getTitle(), serviceCard.getContent(), serviceCard.getPrice());
-
-        return serviceCard;
-    }
-
-    /**
-     * 构建结果Schema
-     */
-    private ResultSchema buildResultSchema() {
-        ResultSchema schema = new ResultSchema();
-        schema.setType("object");
-
-        Map<String, Object> properties = new HashMap<>();
-
-        // title字段
-        Map<String, Object> titleProp = new HashMap<>();
-        titleProp.put("type", "string");
-        titleProp.put("description", "订单标题");
-        properties.put("title", titleProp);
-
-        // price字段
-        Map<String, Object> priceProp = new HashMap<>();
-        priceProp.put("type", "integer");
-        priceProp.put("description", "价格，单位：分");
-        properties.put("price", priceProp);
-
-        // content字段
-        Map<String, Object> contentProp = new HashMap<>();
-        contentProp.put("type", "object");
-        contentProp.put("description", "扩展字段，K-V对描述订单详细条件");
-        properties.put("content", contentProp);
-
-        // products字段 - 使用ProductInfoSchemaVO构建
-        Map<String, Object> productsProp = new HashMap<>();
-        productsProp.put("type", "array");
-        productsProp.put("description", "候选服务列表");
-        productsProp.put("items", ProductInfoSchemaVO.buildDefault());
-        properties.put("products", productsProp);
-
-        schema.setProperties(properties);
-        schema.setRequired(Arrays.asList("title", "price", "content", "products"));
-
-        return schema;
-    }
-
-    /**
-     * 解析价格为整数（分）
-     */
-    private int parsePrice(Object priceObj) {
-        if (priceObj == null) {
-            return 0;
-        }
-        if (priceObj instanceof Number) {
-            return ((Number) priceObj).intValue();
-        }
-        if (priceObj instanceof String) {
-            return PriceParser.parseToCents((String) priceObj);
-        }
-        return 0;
-    }
-
-    /**
-     * 手动创建协商草案（原有逻辑）
-     */
-    private NegotiationEntity createNegotiationManually(NegotiationEntity entity) {
-        LOGGER.info("使用手动逻辑创建协商草案");
-
-        // 1. 获取title: 如果demandId存在，调用findu-dms获取description
-        String title = "";
-        if (entity.getDemandId() != null && !entity.getDemandId().isEmpty()) {
-            try {
-                String description = dmsClient.getDemandDescription(entity.getCustomerId(), entity.getDemandId());
-                if (description != null) {
-                    title = description;
-                }
-            } catch (Exception e) {
-                LOGGER.warn("获取需求描述失败，demandId={}", entity.getDemandId(), e);
-            }
-        }
-        entity.setTitle(title);
-
-        // 2. 设置content为空对象
-        entity.setContent(new HashMap<>());
-
-        // 3. 获取products: 调用findu-user获取providerId的服务列表
-        List<ProviderServiceCard> worksList = new ArrayList<>();
-        try {
-            worksList = userClient.getProviderWorks(entity.getProviderId());
-        } catch (Exception e) {
-            LOGGER.warn("获取服务列表失败，providerId={}", entity.getProviderId(), e);
-        }
-
-        // 4. 转换为ProductInfo列表，设置is_selected
-        List<ProductInfoVO> products = new ArrayList<>();
-        int price = 0;
-        String selectedProductId = entity.getProductId();
-
-        for (ProviderServiceCard work : worksList) {
-            String worksId = work.getWorksId();
-            String workTitle = work.getTitle();
-            boolean isSelected = worksId != null && worksId.equals(selectedProductId);
-
-            products.add(new ProductInfoVO(worksId, workTitle, isSelected));
-
-            // 5. 计算price: 从选中的product或第一个product的expectedPrice解析
-            if (isSelected || (price == 0 && !products.isEmpty())) {
-                String expectedPrice = extractExpectedPrice(work);
-                int parsedPrice = PriceParser.parseToCents(expectedPrice);
-                if (isSelected || price == 0) {
-                    price = parsedPrice;
-                }
-            }
-        }
-
-        // 如果有productId但没有找到匹配的，设置第一个为选中
-        if (selectedProductId == null || selectedProductId.isEmpty()) {
-            if (!products.isEmpty()) {
-                products.get(0).setSelected(true);
-            }
-        }
-
-        entity.setProducts(products);
-        entity.setPrice(price);
-
-        LOGGER.info("协商创建成功: title={}, price={}, productsCount={}",
-                title, price, products.size());
 
         return entity;
-    }
-
-    private String extractExpectedPrice(ProviderServiceCard work) {
-        if (work.getExtendInfo() != null && work.getExtendInfo().getExpectedPrice() != null) {
-            return work.getExtendInfo().getExpectedPrice();
-        }
-        return null;
     }
 }

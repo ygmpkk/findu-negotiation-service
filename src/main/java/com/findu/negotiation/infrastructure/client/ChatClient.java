@@ -1,8 +1,7 @@
 package com.findu.negotiation.infrastructure.client;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.findu.negotiation.infrastructure.client.dto.chat.ChatHistoryData;
 import com.findu.negotiation.infrastructure.client.dto.chat.ChatHistoryResponse;
 import com.findu.negotiation.infrastructure.exception.BusinessException;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.List;
 
 @Component
 public class ChatClient {
@@ -50,29 +48,29 @@ public class ChatClient {
                 throw new BusinessException(ErrorCode.INTERNAL_ERROR, "Chat服务返回空响应");
             }
 
-            JSONObject result = JSON.parseObject(response.getBody());
-            Integer msgCount = result.getInteger("msg_count");
-            Boolean complete = result.getBoolean("complete");
-            String lastMsgKey = result.getString("last_msg_key");
-            JSONArray messages = result.getJSONArray("messages");
-            List<Object> messageList = messages != null ? messages : List.of();
+            // Use ObjectMapper to properly deserialize the response with custom deserializers
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode resultNode = objectMapper.readTree(response.getBody());
 
-            ChatHistoryData data = new ChatHistoryData(
-                    userA,
-                    userB,
-                    msgCount,
-                    complete,
-                    lastMsgKey,
-                    messageList
-            );
+            ChatHistoryData data = objectMapper.treeToValue(resultNode, ChatHistoryData.class);
+            // Set user_a and user_b from request parameters if not in response
+            if (data.getProviderId() == null) {
+                data.setProviderId(userA);
+            }
+            if (data.getCustomerId() == null) {
+                data.setCustomerId(userB);
+            }
 
             return new ChatHistoryResponse(
                     true,
-                    String.format("成功获取 %d 条消息", msgCount != null ? msgCount : 0),
+                    String.format("成功获取 %d 条消息", data.getMsgCount() != null ? data.getMsgCount() : 0),
                     data
             );
         } catch (RestClientException e) {
             LOGGER.error("调用Chat服务失败: url={}", url, e);
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR, e);
+        } catch (Exception e) {
+            LOGGER.error("解析Chat服务响应失败: url={}", url, e);
             throw new BusinessException(ErrorCode.INTERNAL_ERROR, e);
         }
     }

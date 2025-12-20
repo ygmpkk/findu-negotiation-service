@@ -10,7 +10,7 @@ import lombok.ToString;
  */
 @ToString
 @Data
-public class ProviderServiceCard {
+public class ProviderProduct {
     /**
      * 服务卡片ID
      */

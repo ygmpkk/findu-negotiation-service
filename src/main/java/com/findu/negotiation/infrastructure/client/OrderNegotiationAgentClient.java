@@ -40,7 +40,7 @@ public class OrderNegotiationAgentClient {
                 request.getId(),
                 request.getAgentConversations() != null ? request.getAgentConversations().size() : 0,
                 request.getHumanConversations() != null ? request.getHumanConversations().size() : 0,
-                request.getServiceCard() != null ? request.getServiceCard().getTitle() : null);
+                request.getProducts() != null ? request.getProducts().size() : 0);
 
         HttpUtil.HttpResponse<OrderNegotiationCompletionsResponse> completionsResponse = HttpUtil.postJson(url, request, OrderNegotiationCompletionsResponse.class);
         if (!completionsResponse.isSuccessful()) {

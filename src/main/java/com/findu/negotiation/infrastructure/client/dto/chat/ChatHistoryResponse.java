@@ -10,7 +10,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatHistoryResponse {
-
     private Boolean success;
     private String message;
     private ChatHistoryData data;

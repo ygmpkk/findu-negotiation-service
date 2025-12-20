@@ -1,5 +1,6 @@
 package com.findu.negotiation.domain.entity;
 
+import com.findu.negotiation.domain.vo.NegotiationResultVO;
 import com.findu.negotiation.domain.vo.ProductInfoVO;
 import lombok.*;
 
@@ -61,6 +62,11 @@ public class NegotiationEntity {
      * 产品信息
      */
     public List<ProductInfoVO> products;
+
+    /**
+     * 协商结果
+     */
+    public NegotiationResultVO result;
 
     /**
      * 创建时间

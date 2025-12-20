@@ -1,10 +1,7 @@
 package com.findu.negotiation.infrastructure.client;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.findu.negotiation.infrastructure.client.dto.user.ProviderUserResponse;
-import com.findu.negotiation.infrastructure.client.dto.user.ProviderServiceCard;
+import com.findu.negotiation.infrastructure.client.dto.user.ProviderProduct;
 import com.findu.negotiation.infrastructure.exception.BusinessException;
 import com.findu.negotiation.infrastructure.exception.ErrorCode;
 import org.slf4j.Logger;
@@ -18,7 +15,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class UserClient {
@@ -40,7 +36,7 @@ public class UserClient {
      * @param providerId 服务提供者ID
      * @return 服务列表，每个元素包含 worksId, title, extendInfo
      */
-    public List<ProviderServiceCard> getProviderWorks(String providerId) {
+    public List<ProviderProduct> getProviderWorks(String providerId) {
         String url = UriComponentsBuilder.fromUriString(baseUrl)
                 .path("/api/v1/inner/user-admin/works/{userId}/public")
                 .queryParam("type", 3)
