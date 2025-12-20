@@ -12,7 +12,6 @@ import com.findu.negotiation.infrastructure.client.dto.chat.ChatHistoryResponse;
 import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.ConversationItem;
 import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.OrderNegotiationCompletionsRequest;
 import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.OrderNegotiationCompletionsResponse;
-import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.ServiceCard;
 import com.findu.negotiation.infrastructure.client.dto.user.ProviderProduct;
 import com.findu.negotiation.infrastructure.util.PriceParser;
 import org.slf4j.Logger;

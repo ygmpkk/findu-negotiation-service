@@ -1,6 +1,7 @@
 package com.findu.negotiation.interfaces.dto;
 
 import com.findu.negotiation.domain.entity.NegotiationEntity;
+import com.findu.negotiation.domain.vo.ProductInfoVO;
 import lombok.*;
 
 import java.util.Date;
@@ -34,7 +35,7 @@ public class CreateNegotiationResponse {
     /**
      * 选择的产品列表
      */
-    private List<ProductInfo> products;
+    private List<ProductInfoVO> products;
 
     /**
      * 创建时间
