@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+
 /**
  * @author timothy
  * @date 2025/12/20
@@ -16,7 +18,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExtendInfo {
-    public String pois;
+    public List<String> pois;
 
     /**
      * 预期价格，示例：300元\/小时
