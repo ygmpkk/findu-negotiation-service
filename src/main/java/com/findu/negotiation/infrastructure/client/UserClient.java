@@ -48,7 +48,7 @@ public class UserClient {
         LOGGER.info("调用User服务获取产品列表: providerId={}, url={}", providerId, url);
 
         try {
-            ResponseEntity<ProviderUserResponse> response = httpClientWrapper.get(url, ProviderUserResponse.class, true);
+            ResponseEntity<ProviderUserResponse> response = httpClientWrapper.getJson(url, ProviderUserResponse.class, true);
             LOGGER.info("User服务响应: statusCode={}, body={}", response.getStatusCode(), response.getBody());
 
             if (!response.getStatusCode().is2xxSuccessful()) {

@@ -43,6 +43,12 @@ public class HttpClientWrapper {
         return get(url, null, responseType, passAuthorization);
     }
 
+    public <T> ResponseEntity<T> getJson(String url, Class<T> responseType, boolean passAuthorization) {
+        Map<String, String> additionalHeaders = new HashMap<>();
+        additionalHeaders.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        return get(url, additionalHeaders, responseType, passAuthorization);
+    }
+
     /**
      * 发送GET请求
      *
@@ -160,7 +166,6 @@ public class HttpClientWrapper {
      */
     private HttpHeaders buildHeaders(Map<String, String> additionalHeaders, boolean passAuthorization) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         // 透传Authorization header
         if (passAuthorization) {
