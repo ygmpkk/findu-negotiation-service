@@ -1,8 +1,8 @@
-package com.findu.negotiation.interfaces.handler;
+package com.findu.negotiation.infrastructure.handler;
 
 import com.findu.negotiation.infrastructure.exception.BusinessException;
 import com.findu.negotiation.infrastructure.exception.ErrorCode;
-import com.findu.negotiation.interfaces.response.ApiResponse;
+import com.findu.negotiation.interfaces.dto.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,10 @@
 package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * 对话项
@@ -8,6 +12,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author timothy
  * @date 2025/12/14
  */
+@ToString
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ConversationItem {
 
     @JsonProperty("sender")
@@ -18,39 +26,6 @@ public class ConversationItem {
 
     @JsonProperty("timestamp")
     private Long timestamp;
-
-    public ConversationItem() {
-    }
-
-    public ConversationItem(String sender, String content, Long timestamp) {
-        this.sender = sender;
-        this.content = content;
-        this.timestamp = timestamp;
-    }
-
-    public String getSender() {
-        return sender;
-    }
-
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-    }
 }
 
 

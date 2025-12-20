@@ -1,6 +1,11 @@
 package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import java.util.Map;
 
 /**
@@ -9,6 +14,10 @@ import java.util.Map;
  * @author timothy
  * @date 2025/12/14
  */
+@ToString
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ResultSchema {
 
     @JsonProperty("type")
@@ -19,38 +28,5 @@ public class ResultSchema {
 
     @JsonProperty("required")
     private java.util.List<String> required;
-
-    public ResultSchema() {
-    }
-
-    public ResultSchema(String type, Map<String, Object> properties, java.util.List<String> required) {
-        this.type = type;
-        this.properties = properties;
-        this.required = required;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Map<String, Object> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, Object> properties) {
-        this.properties = properties;
-    }
-
-    public java.util.List<String> getRequired() {
-        return required;
-    }
-
-    public void setRequired(java.util.List<String> required) {
-        this.required = required;
-    }
 }
 

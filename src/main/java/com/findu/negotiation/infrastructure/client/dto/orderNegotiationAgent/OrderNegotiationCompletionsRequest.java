@@ -1,6 +1,11 @@
 package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import java.util.List;
 
 /**
@@ -9,6 +14,10 @@ import java.util.List;
  * @author timothy
  * @date 2025/12/14
  */
+@ToString
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderNegotiationCompletionsRequest {
 
     @JsonProperty("id")
@@ -25,59 +34,4 @@ public class OrderNegotiationCompletionsRequest {
 
     @JsonProperty("result_schema")
     private ResultSchema resultSchema;
-
-    public OrderNegotiationCompletionsRequest() {
-    }
-
-    public OrderNegotiationCompletionsRequest(String id,
-                                             List<ConversationItem> agentConversations,
-                                             List<ConversationItem> humanConversations,
-                                             ServiceCard serviceCard,
-                                             ResultSchema resultSchema) {
-        this.id = id;
-        this.agentConversations = agentConversations;
-        this.humanConversations = humanConversations;
-        this.serviceCard = serviceCard;
-        this.resultSchema = resultSchema;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public List<ConversationItem> getAgentConversations() {
-        return agentConversations;
-    }
-
-    public void setAgentConversations(List<ConversationItem> agentConversations) {
-        this.agentConversations = agentConversations;
-    }
-
-    public List<ConversationItem> getHumanConversations() {
-        return humanConversations;
-    }
-
-    public void setHumanConversations(List<ConversationItem> humanConversations) {
-        this.humanConversations = humanConversations;
-    }
-
-    public ServiceCard getServiceCard() {
-        return serviceCard;
-    }
-
-    public void setServiceCard(ServiceCard serviceCard) {
-        this.serviceCard = serviceCard;
-    }
-
-    public ResultSchema getResultSchema() {
-        return resultSchema;
-    }
-
-    public void setResultSchema(ResultSchema resultSchema) {
-        this.resultSchema = resultSchema;
-    }
 }

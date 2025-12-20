@@ -1,6 +1,10 @@
 package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * 服务卡信息
@@ -8,6 +12,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author timothy
  * @date 2025/12/14
  */
+@ToString
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ServiceCard {
 
     @JsonProperty("title")
@@ -21,47 +29,5 @@ public class ServiceCard {
 
     @JsonProperty("product_id")
     private String productId;
-
-    public ServiceCard() {
-    }
-
-    public ServiceCard(String title, String content, Integer price, String productId) {
-        this.title = title;
-        this.content = content;
-        this.price = price;
-        this.productId = productId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
-
-    public String getProductId() {
-        return productId;
-    }
-
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
 }
 

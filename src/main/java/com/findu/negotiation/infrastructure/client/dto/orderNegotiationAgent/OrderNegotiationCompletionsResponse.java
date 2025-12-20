@@ -1,6 +1,11 @@
 package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import java.util.Map;
 
 /**
@@ -9,6 +14,10 @@ import java.util.Map;
  * @author timothy
  * @date 2025/12/14
  */
+@ToString
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderNegotiationCompletionsResponse {
 
     @JsonProperty("id")
@@ -16,29 +25,5 @@ public class OrderNegotiationCompletionsResponse {
 
     @JsonProperty("result")
     private Map<String, Object> result;
-
-    public OrderNegotiationCompletionsResponse() {
-    }
-
-    public OrderNegotiationCompletionsResponse(String id, Map<String, Object> result) {
-        this.id = id;
-        this.result = result;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Map<String, Object> getResult() {
-        return result;
-    }
-
-    public void setResult(Map<String, Object> result) {
-        this.result = result;
-    }
 }
 

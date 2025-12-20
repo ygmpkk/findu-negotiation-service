@@ -1,36 +1,44 @@
 package com.findu.negotiation.interfaces.controller;
 
-import com.findu.negotiation.application.service.NegotiationService;
-import com.findu.negotiation.interfaces.request.CreateNegotiationRequest;
-import com.findu.negotiation.interfaces.response.ApiResponse;
-import com.findu.negotiation.interfaces.response.CreateNegotiationResponse;
+import com.findu.negotiation.application.NegotiationBizService;
+import com.findu.negotiation.domain.entity.NegotiationEntity;
+import com.findu.negotiation.infrastructure.exception.BusinessException;
+import com.findu.negotiation.infrastructure.exception.ErrorCode;
+import com.findu.negotiation.interfaces.dto.CreateNegotiationRequest;
+import com.findu.negotiation.interfaces.dto.ApiResponse;
+import com.findu.negotiation.interfaces.dto.CreateNegotiationResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/orders_negotiation")
 public class NegotiationController {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(NegotiationController.class);
 
-    private final NegotiationService negotiationService;
-
-    public NegotiationController(NegotiationService negotiationService) {
-        this.negotiationService = negotiationService;
-    }
+    @Autowired
+    private NegotiationBizService negotiationBizService;
 
     @PostMapping("/create")
-    public ApiResponse<CreateNegotiationResponse> create(
-            @Valid @RequestBody CreateNegotiationRequest request) {
+    public ApiResponse<CreateNegotiationResponse> create(@Valid @RequestBody CreateNegotiationRequest request) {
+        LOGGER.info("创建协商请求: request={}", request);
 
-        LOGGER.info("创建协商请求: providerId={}, customerId={}, demandId={}, productId={}",
-                request.getProviderId(), request.getCustomerId(),
-                request.getDemandId(), request.getProductId());
+        try {
+            NegotiationEntity negotiationEntity = negotiationBizService.createNegotiation(
+                    request.getProviderId(),
+                    request.getCustomerId(),
+                    request.getDemandId(),
+                    request.getProductId());
 
-        CreateNegotiationResponse response = negotiationService.createNegotiation(request);
+            LOGGER.info("协商创建成功: entity={}", negotiationEntity);
 
-        return ApiResponse.success(response);
+            CreateNegotiationResponse response = CreateNegotiationResponse.createByDomain(negotiationEntity);
+            return ApiResponse.success(response);
+        } catch (BusinessException e) {
+            LOGGER.error("创建协商失败，系统错误", e);
+            return ApiResponse.error(e.getCode(), e.getMessage());
+        }
     }
 }

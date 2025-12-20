@@ -1,4 +1,4 @@
-package com.findu.negotiation.interfaces.response;
+package com.findu.negotiation.interfaces.dto;
 
 import com.findu.negotiation.infrastructure.exception.ErrorCode;
 

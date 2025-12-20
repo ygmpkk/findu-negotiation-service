@@ -1,28 +1,23 @@
-package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
+package com.findu.negotiation.interfaces.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+
 
 /**
- * Agent服务返回的产品信息
- *
  * @author timothy
- * @date 2025/12/13
+ * @date 2025/12/19
  */
-@ToString
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgentProductInfo {
-
+public class ProductInfo {
     private String id;
 
     private String title;
 
     @JsonProperty("is_selected")
-    private boolean isSelected;
+    private boolean selected;
 }
-
