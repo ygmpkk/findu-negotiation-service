@@ -26,6 +26,5 @@ public class ProviderProduct {
      */
     public String description;
 
-    @JsonProperty("extend_info")
     public ExtendInfo extendInfo;
 }
