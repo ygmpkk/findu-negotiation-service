@@ -85,10 +85,10 @@ public class NegotiationBizServiceImpl implements NegotiationBizService {
                 for (var content : msg.getContent()) {
                     if (content.isTextContent()) {
                         item.setContent(content.getContentAsText());
+                        humanConversations.add(item);
                         break;
                     }
                 }
-                humanConversations.add(item);
             }
         }
 
