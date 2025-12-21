@@ -1,6 +1,5 @@
 package com.findu.negotiation.infrastructure.client.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
 
@@ -24,7 +23,7 @@ public class ProviderProduct {
     /**
      * 服务卡片描述
      */
-    public String description;
+    public String content;
 
     public ExtendInfo extendInfo;
 }

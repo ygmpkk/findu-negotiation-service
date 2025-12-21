@@ -2,7 +2,6 @@ package com.findu.negotiation.application;
 
 import com.findu.negotiation.domain.entity.NegotiationEntity;
 import com.findu.negotiation.domain.vo.NegotiationResultSchemaVO;
-import com.findu.negotiation.domain.vo.NegotiationResultVO;
 import com.findu.negotiation.domain.vo.ProductInfoVO;
 import com.findu.negotiation.infrastructure.client.ChatClient;
 import com.findu.negotiation.infrastructure.client.DmsClient;
@@ -13,7 +12,6 @@ import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.Con
 import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.OrderNegotiationCompletionsRequest;
 import com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent.OrderNegotiationCompletionsResponse;
 import com.findu.negotiation.infrastructure.client.dto.user.ProviderProduct;
-import com.findu.negotiation.infrastructure.util.PriceParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +63,7 @@ public class NegotiationBizServiceImpl implements NegotiationBizService {
             ProductInfoVO productInfoVO = new ProductInfoVO();
             productInfoVO.setId(product.getWorksId());
             productInfoVO.setTitle(product.getTitle());
-            productInfoVO.setDescription(product.getDescription());
+            productInfoVO.setDescription(product.getContent());
             productInfoVO.setPrice(product.getExtendInfo().getParsedPrice());
             productInfoVOS.add(productInfoVO);
         }
