@@ -124,9 +124,9 @@ public class NegotiationBizServiceImpl implements NegotiationBizService {
         entity.setTitle(agentResponse.getResult().getTitle());
         entity.setContent(agentResponse.getResult().getContent());
 
-        for (ProductInfoVO product : agentResponse.getResult().getProducts()) {
-            // 找到和 productInfoVOS匹配的 id
-            if (productInfoVOS.stream().anyMatch(p -> p.getId().equals(product.getId()))) {
+        for (ProductInfoVO product :productInfoVOS) {
+            // 找到和 productInfoVOS 匹配的 product id
+            if (agentResponse.getResult().getProducts().stream().anyMatch(p -> product.getId().equals(p.getId()))) {
                 product.setSelected(true);
                 break;
             }
