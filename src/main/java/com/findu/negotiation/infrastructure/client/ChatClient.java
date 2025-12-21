@@ -32,7 +32,7 @@ public class ChatClient {
 
     public ChatHistoryResponse getChatHistory(String userA, String userB) {
         String url = UriComponentsBuilder.fromUriString(baseUrl)
-                .path("/inner/chat_history/{userA}/{userB}")
+                .path("/api/v1/inner/chat_history/{userA}/{userB}")
                 .buildAndExpand(userA, userB)
                 .toUriString();
 
