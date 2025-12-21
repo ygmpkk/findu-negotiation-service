@@ -1,6 +1,5 @@
 package com.findu.negotiation.infrastructure.client.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.findu.negotiation.infrastructure.util.PriceParser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExtendInfo {
-    public List<String> pois;
+    public List<PoiInfo> pois;
 
     /**
      * 预期价格，示例：300元\/小时
