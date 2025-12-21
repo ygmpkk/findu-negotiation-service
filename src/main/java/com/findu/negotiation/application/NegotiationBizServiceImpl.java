@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class NegotiationBizServiceImpl implements NegotiationBizService {
@@ -91,6 +92,10 @@ public class NegotiationBizServiceImpl implements NegotiationBizService {
             }
         }
 
+        LOGGER.info("获取IM历史对话完成: 对话记录={}", humanConversations
+                .stream()
+                .map(conversationItem -> "[" + conversationItem.getSender() + "]: " + conversationItem.getContent())
+                .collect(Collectors.joining("\n")));
 
         // 4. 调用Agent，根据对话选取最合适的服务 product
 
