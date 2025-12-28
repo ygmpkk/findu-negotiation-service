@@ -133,5 +133,40 @@ class ChatHistoryDataTest {
         assertEquals("other_custom", customContent.getDesc());
         assertNotNull(customContent.getData());
     }
+
+    @Test
+    void testNullContentDeserialization() throws Exception {
+        String json = """
+                {
+                    "type": "custom",
+                    "content": null
+                }
+                """;
+
+        ChatHistoryData.MessageContent messageContent = objectMapper.readValue(json, ChatHistoryData.MessageContent.class);
+
+        assertEquals("custom", messageContent.getType());
+        assertNull(messageContent.getContent());
+        assertFalse(messageContent.isDemandCardContent());
+        assertFalse(messageContent.isCustomContent());
+        assertFalse(messageContent.isTextContent());
+        assertFalse(messageContent.isImageContent());
+    }
+
+    @Test
+    void testEmptyCustomContentDeserialization() throws Exception {
+        String json = """
+                {
+                    "type": "custom",
+                    "content": {}
+                }
+                """;
+
+        ChatHistoryData.MessageContent messageContent = objectMapper.readValue(json, ChatHistoryData.MessageContent.class);
+
+        assertEquals("custom", messageContent.getType());
+        // Empty object should still be parsed, but with null type
+        assertFalse(messageContent.isDemandCardContent());
+    }
 }
 

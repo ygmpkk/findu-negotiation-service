@@ -23,6 +23,13 @@ public class MessageContentDeserializer extends JsonDeserializer<ChatHistoryData
 
         // Deserialize content based on type
         JsonNode contentNode = node.get("content");
+
+        // Handle null content node
+        if (contentNode == null || contentNode.isNull()) {
+            messageContent.setContent(null);
+            return messageContent;
+        }
+
         if ("text".equals(type)) {
             // For text type, content is a String
             messageContent.setContent(contentNode.asText());
@@ -34,8 +41,8 @@ public class MessageContentDeserializer extends JsonDeserializer<ChatHistoryData
             // For custom type, first parse as CustomContent
             ChatHistoryData.CustomContent customContent = mapper.treeToValue(contentNode, ChatHistoryData.CustomContent.class);
 
-            // Check if the custom content is a demand_card
-            if ("demand_card".equals(customContent.getType())) {
+            // Check if customContent is null or if the custom content is a demand_card
+            if (customContent != null && "demand_card".equals(customContent.getType())) {
                 try {
                     // Parse the data field as DemandCardContent
                     ChatHistoryData.DemandCardContent demandCardContent = mapper.readValue(
@@ -47,9 +54,12 @@ public class MessageContentDeserializer extends JsonDeserializer<ChatHistoryData
                     // If parsing fails, keep the CustomContent with raw data string
                     messageContent.setContent(customContent);
                 }
-            } else {
+            } else if (customContent != null) {
                 // For other custom types, keep as CustomContent
                 messageContent.setContent(customContent);
+            } else {
+                // If customContent is null, store as raw string
+                messageContent.setContent(contentNode.toString());
             }
         } else {
             // For other types, keep as JsonNode or String
