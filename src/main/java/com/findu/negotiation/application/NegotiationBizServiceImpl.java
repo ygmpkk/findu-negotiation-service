@@ -87,6 +87,25 @@ public class NegotiationBizServiceImpl implements NegotiationBizService {
                         item.setContent(content.getContentAsText());
                         humanConversations.add(item);
                         break;
+                    } else if (content.isDemandCardContent()) {
+                        // Handle demand card content - extract meaningful information
+                        var demandCard = content.getContentAsDemandCard();
+                        if (demandCard != null) {
+                            StringBuilder demandInfo = new StringBuilder();
+                            demandInfo.append("[需求卡片] ");
+                            if (demandCard.getDemandTitle() != null) {
+                                demandInfo.append(demandCard.getDemandTitle()).append(": ");
+                            }
+                            if (demandCard.getLocation() != null) {
+                                demandInfo.append("地点: ").append(demandCard.getLocation()).append(", ");
+                            }
+                            if (demandCard.getBudget() != null) {
+                                demandInfo.append("预算: ").append(demandCard.getBudget());
+                            }
+                            item.setContent(demandInfo.toString());
+                            humanConversations.add(item);
+                            break;
+                        }
                     }
                 }
             }

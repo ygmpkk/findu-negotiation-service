@@ -92,6 +92,26 @@ public class ChatHistoryData {
         }
 
         /**
+         * Get content as CustomContent (for custom type)
+         */
+        public CustomContent getContentAsCustom() {
+            if (content instanceof CustomContent) {
+                return (CustomContent) content;
+            }
+            return null;
+        }
+
+        /**
+         * Get content as DemandCardContent (for demand_card type within custom)
+         */
+        public DemandCardContent getContentAsDemandCard() {
+            if (content instanceof DemandCardContent) {
+                return (DemandCardContent) content;
+            }
+            return null;
+        }
+
+        /**
          * Check if content is text type
          */
         public boolean isTextContent() {
@@ -103,6 +123,20 @@ public class ChatHistoryData {
          */
         public boolean isImageContent() {
             return "image".equals(type) && content instanceof ImageContent;
+        }
+
+        /**
+         * Check if content is custom type
+         */
+        public boolean isCustomContent() {
+            return "custom".equals(type) && content instanceof CustomContent;
+        }
+
+        /**
+         * Check if content is demand_card type
+         */
+        public boolean isDemandCardContent() {
+            return "custom".equals(type) && content instanceof DemandCardContent;
         }
     }
 
@@ -140,5 +174,71 @@ public class ChatHistoryData {
 
         @JsonProperty("URL")
         private String url;
+    }
+
+    @ToString
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static public class CustomContent {
+        @JsonProperty("type")
+        private String type;
+
+        @JsonProperty("data")
+        private String data; // JSON string for custom data
+
+        @JsonProperty("desc")
+        private String desc;
+    }
+
+    @ToString
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static public class DemandCardContent {
+        @JsonProperty("type")
+        private String type;
+
+        @JsonProperty("version")
+        private String version;
+
+        @JsonProperty("demandId")
+        private String demandId;
+
+        @JsonProperty("demand_id")
+        private String demandIdAlt;
+
+        @JsonProperty("nickname")
+        private String nickname;
+
+        @JsonProperty("avatar")
+        private String avatar;
+
+        @JsonProperty("tag")
+        private String tag;
+
+        @JsonProperty("subtitle")
+        private String subtitle;
+
+        @JsonProperty("demandTitle")
+        private String demandTitle;
+
+        @JsonProperty("budget")
+        private String budget;
+
+        @JsonProperty("schedule")
+        private String schedule;
+
+        @JsonProperty("location")
+        private String location;
+
+        @JsonProperty("rawDescription")
+        private String rawDescription;
+
+        @JsonProperty("source")
+        private String source;
+
+        @JsonProperty("isAuto")
+        private Boolean isAuto;
     }
 }

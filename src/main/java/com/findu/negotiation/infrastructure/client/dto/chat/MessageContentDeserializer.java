@@ -30,6 +30,27 @@ public class MessageContentDeserializer extends JsonDeserializer<ChatHistoryData
             // For image type, content is an ImageContent object
             ChatHistoryData.ImageContent imageContent = mapper.treeToValue(contentNode, ChatHistoryData.ImageContent.class);
             messageContent.setContent(imageContent);
+        } else if ("custom".equals(type)) {
+            // For custom type, first parse as CustomContent
+            ChatHistoryData.CustomContent customContent = mapper.treeToValue(contentNode, ChatHistoryData.CustomContent.class);
+
+            // Check if the custom content is a demand_card
+            if ("demand_card".equals(customContent.getType())) {
+                try {
+                    // Parse the data field as DemandCardContent
+                    ChatHistoryData.DemandCardContent demandCardContent = mapper.readValue(
+                        customContent.getData(),
+                        ChatHistoryData.DemandCardContent.class
+                    );
+                    messageContent.setContent(demandCardContent);
+                } catch (Exception e) {
+                    // If parsing fails, keep the CustomContent with raw data string
+                    messageContent.setContent(customContent);
+                }
+            } else {
+                // For other custom types, keep as CustomContent
+                messageContent.setContent(customContent);
+            }
         } else {
             // For other types, keep as JsonNode or String
             messageContent.setContent(contentNode.toString());

@@ -1,10 +1,6 @@
 package com.findu.negotiation.infrastructure.client;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.findu.negotiation.infrastructure.client.dto.chat.ChatHistoryData;
 import com.findu.negotiation.infrastructure.client.dto.chat.ChatHistoryResponse;
-import com.findu.negotiation.infrastructure.client.dto.user.ProviderUserResponse;
 import com.findu.negotiation.infrastructure.exception.BusinessException;
 import com.findu.negotiation.infrastructure.exception.ErrorCode;
 import org.slf4j.Logger;
