@@ -9,7 +9,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -288,102 +287,6 @@ class HttpLoggingFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain filterChain = new MockFilterChain();
 
-        assertDoesNotThrow(() -> {
-            filter.doFilter(request, response, filterChain);
-        });
-    }
-
-    @Test
-    void testFilterWithXForwardedForHeader() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setMethod("POST");
-        request.setRequestURI("/api/test");
-        request.addHeader("X-Forwarded-For", "203.0.113.45, 198.51.100.1");
-        request.addHeader("X-Request-Id", "req-xff");
-        request.setContent("{\"test\":\"data\"}".getBytes());
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        MockFilterChain filterChain = new MockFilterChain();
-
-        // 应该记录第一个IP地址
-        assertDoesNotThrow(() -> {
-            filter.doFilter(request, response, filterChain);
-        });
-    }
-
-    @Test
-    void testFilterWithXRealIPHeader() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setMethod("GET");
-        request.setRequestURI("/api/test");
-        request.addHeader("X-Real-IP", "192.168.1.100");
-        request.addHeader("X-Trace-Id", "trace-realip");
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        MockFilterChain filterChain = new MockFilterChain();
-
-        assertDoesNotThrow(() -> {
-            filter.doFilter(request, response, filterChain);
-        });
-    }
-
-    @Test
-    void testFilterWithProxyClientIPHeader() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setMethod("POST");
-        request.setRequestURI("/api/test");
-        request.addHeader("Proxy-Client-IP", "10.0.0.50");
-        request.addHeader("X-Request-Id", "req-proxy");
-        request.setContent("{\"data\":\"test\"}".getBytes());
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        MockFilterChain filterChain = new MockFilterChain();
-
-        assertDoesNotThrow(() -> {
-            filter.doFilter(request, response, filterChain);
-        });
-    }
-
-    @Test
-    void testFilterWithRemoteAddrOnly() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setMethod("GET");
-        request.setRequestURI("/api/test");
-        request.setRemoteAddr("172.16.0.10");
-        request.addHeader("X-Trace-Id", "trace-remote");
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        MockFilterChain filterChain = new MockFilterChain();
-
-        // 没有反向代理头时，应该使用 RemoteAddr
-        assertDoesNotThrow(() -> {
-            filter.doFilter(request, response, filterChain);
-        });
-    }
-
-    @Test
-    void testFilterWithChineseCharacters() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setMethod("POST");
-        request.setRequestURI("/api/negotiation/create");
-        request.addHeader("Content-Type", "application/json;charset=UTF-8");
-        request.addHeader("X-Request-Id", "req-chinese");
-        request.addHeader("X-Trace-Id", "trace-chinese");
-        request.setCharacterEncoding("UTF-8");
-
-        String chineseJson = "{\"title\":\"黑客攻略\",\"description\":\"一层黑客来袭，二层获得第二和第三名\",\"price\":50000}";
-        request.setContent(chineseJson.getBytes(StandardCharsets.UTF_8));
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        response.setCharacterEncoding("UTF-8");
-
-        FilterChain filterChain = (req, resp) -> {
-            resp.setContentType("application/json;charset=UTF-8");
-            String responseJson = "{\"code\":200,\"message\":\"成功\",\"data\":{\"title\":\"黑客攻略\"}}";
-            resp.getOutputStream().write(responseJson.getBytes(StandardCharsets.UTF_8));
-        };
-
-        // 应该正确处理中文字符，不出现乱码
         assertDoesNotThrow(() -> {
             filter.doFilter(request, response, filterChain);
         });

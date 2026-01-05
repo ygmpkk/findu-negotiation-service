@@ -63,11 +63,18 @@ public class HttpClientWrapper {
         HttpHeaders headers = buildHeaders(additionalHeaders, passAuthorization);
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
+        long startTime = System.currentTimeMillis();
         try {
             LOGGER.debug("发送GET请求: url={}, passAuthorization={}", url, passAuthorization);
-            return restTemplate.exchange(url, HttpMethod.GET, request, responseType);
+            ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.GET, request, responseType);
+            long procTime = System.currentTimeMillis() - startTime;
+            LOGGER.info("type=http_client, method=GET, uri={}, status={}, proc_time={}ms",
+                url, response.getStatusCode().value(), procTime);
+            return response;
         } catch (RestClientException e) {
-            LOGGER.error("GET请求失败: url={}", url, e);
+            long procTime = System.currentTimeMillis() - startTime;
+            LOGGER.error("type=http_client, method=GET, uri={}, status=error, proc_time={}ms, error={}",
+                url, procTime, e.getMessage());
             throw e;
         }
     }
@@ -102,11 +109,18 @@ public class HttpClientWrapper {
 
         HttpEntity<Object> request = new HttpEntity<>(body, headers);
 
+        long startTime = System.currentTimeMillis();
         try {
             LOGGER.debug("发送POST JSON请求: url={}, passAuthorization={}", url, passAuthorization);
-            return restTemplate.exchange(url, HttpMethod.POST, request, responseType);
+            ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.POST, request, responseType);
+            long procTime = System.currentTimeMillis() - startTime;
+            LOGGER.info("type=http_client, method=POST, uri={}, status={}, proc_time={}ms",
+                url, response.getStatusCode().value(), procTime);
+            return response;
         } catch (RestClientException e) {
-            LOGGER.error("POST JSON请求失败: url={}", url, e);
+            long procTime = System.currentTimeMillis() - startTime;
+            LOGGER.error("type=http_client, method=POST, uri={}, status=error, proc_time={}ms, error={}",
+                url, procTime, e.getMessage());
             throw e;
         }
     }
@@ -148,11 +162,18 @@ public class HttpClientWrapper {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
+        long startTime = System.currentTimeMillis();
         try {
             LOGGER.debug("发送POST FORM请求: url={}, passAuthorization={}", url, passAuthorization);
-            return restTemplate.exchange(url, HttpMethod.POST, request, responseType);
+            ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.POST, request, responseType);
+            long procTime = System.currentTimeMillis() - startTime;
+            LOGGER.info("type=http_client, method=POST, uri={}, status={}, proc_time={}ms",
+                url, response.getStatusCode().value(), procTime);
+            return response;
         } catch (RestClientException e) {
-            LOGGER.error("POST FORM请求失败: url={}", url, e);
+            long procTime = System.currentTimeMillis() - startTime;
+            LOGGER.error("type=http_client, method=POST, uri={}, status=error, proc_time={}ms, error={}",
+                url, procTime, e.getMessage());
             throw e;
         }
     }
