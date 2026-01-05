@@ -81,11 +81,15 @@ public class HttpUtil {
             LOGGER.info("request url:{}", url);
         }
 
+        long startTime = System.currentTimeMillis();
         try (Response response = CLIENT.newCall(request).execute()) {
+            long procTime = System.currentTimeMillis() - startTime;
             ResponseBody responseBody = response.body();
             String responseString = responseBody != null ? responseBody.string() : null;
 
             LOGGER.info("HTTP响应: statusCode={}, body={}", response.code(), responseString);
+            LOGGER.info("type=http_client, method=POST, uri={}, status={}, proc_time={}ms",
+                url, response.code(), procTime);
 
             T parsedBody = null;
             // 只有在成功状态码时才尝试解析响应体为目标类型
@@ -105,7 +109,10 @@ public class HttpUtil {
 
             return new HttpResponse<>(response.code(), parsedBody);
         } catch (IOException e) {
+            long procTime = System.currentTimeMillis() - startTime;
             LOGGER.error("HTTP POST request failed: {}", url, e);
+            LOGGER.error("type=http_client, method=POST, uri={}, status=error, proc_time={}ms, error={}",
+                url, procTime, e.getMessage());
             return new HttpResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), null);
         }
     }
