@@ -9,6 +9,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -355,6 +356,34 @@ class HttpLoggingFilterTest {
         MockFilterChain filterChain = new MockFilterChain();
 
         // 没有反向代理头时，应该使用 RemoteAddr
+        assertDoesNotThrow(() -> {
+            filter.doFilter(request, response, filterChain);
+        });
+    }
+
+    @Test
+    void testFilterWithChineseCharacters() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setMethod("POST");
+        request.setRequestURI("/api/negotiation/create");
+        request.addHeader("Content-Type", "application/json;charset=UTF-8");
+        request.addHeader("X-Request-Id", "req-chinese");
+        request.addHeader("X-Trace-Id", "trace-chinese");
+        request.setCharacterEncoding("UTF-8");
+
+        String chineseJson = "{\"title\":\"黑客攻略\",\"description\":\"一层黑客来袭，二层获得第二和第三名\",\"price\":50000}";
+        request.setContent(chineseJson.getBytes(StandardCharsets.UTF_8));
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        response.setCharacterEncoding("UTF-8");
+
+        FilterChain filterChain = (req, resp) -> {
+            resp.setContentType("application/json;charset=UTF-8");
+            String responseJson = "{\"code\":200,\"message\":\"成功\",\"data\":{\"title\":\"黑客攻略\"}}";
+            resp.getOutputStream().write(responseJson.getBytes(StandardCharsets.UTF_8));
+        };
+
+        // 应该正确处理中文字符，不出现乱码
         assertDoesNotThrow(() -> {
             filter.doFilter(request, response, filterChain);
         });

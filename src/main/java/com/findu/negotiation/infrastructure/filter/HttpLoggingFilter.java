@@ -13,6 +13,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -92,10 +93,10 @@ public class HttpLoggingFilter implements Filter {
 //        Map<String, String> headers = getHeaders(request);
         String requestBody = getRequestBody(request);
 
-        StringBuilder logMessage = new StringBuilder("_com_request_in||");
+        StringBuilder logMessage = new StringBuilder("type=request_in||");
         logMessage.append("request_id=").append(requestId).append("||");
         logMessage.append("trace_id=").append(traceId).append("||");
-        logMessage.append("remote_ip=").append(ipAddr).append("||");
+        logMessage.append("ip=").append(ipAddr).append("||");
         logMessage.append("method=").append(method).append("||");
         logMessage.append("path=").append(path).append("||");
         logMessage.append("args=").append(queryString).append("||");
@@ -119,10 +120,10 @@ public class HttpLoggingFilter implements Filter {
 
 //        Map<String, String> headers = getResponseHeaders(response);
 
-        StringBuilder logMessage = new StringBuilder("_com_request_out||");
+        StringBuilder logMessage = new StringBuilder("type=request_out||");
         logMessage.append("request_id=").append(requestId).append("||");
         logMessage.append("trace_id=").append(traceId).append("||");
-        logMessage.append("remote_ip=").append(ipAddr).append("||");
+        logMessage.append("ip=").append(ipAddr).append("||");
         logMessage.append("method=").append(method).append("||");
         logMessage.append("path=").append(path).append("||");
         logMessage.append("status_code=").append(status).append("||");
@@ -204,13 +205,22 @@ public class HttpLoggingFilter implements Filter {
 
         int length = Math.min(buf.length, MAX_PAYLOAD_LENGTH);
         try {
-            String payload = new String(buf, 0, length, request.getCharacterEncoding());
+            String encoding = request.getCharacterEncoding();
+            if (encoding == null || encoding.isEmpty()) {
+                encoding = StandardCharsets.UTF_8.name();
+            }
+            String payload = new String(buf, 0, length, encoding);
             if (buf.length > MAX_PAYLOAD_LENGTH) {
                 payload += "... (truncated)";
             }
-            return payload;
+            // 将换行符、回车符、制表符替换为空格，保持单行
+            return payload.replaceAll("[\\r\\n\\t]+", " ");
         } catch (UnsupportedEncodingException e) {
-            return "[Unknown Encoding]";
+            String payload = new String(buf, 0, length, StandardCharsets.UTF_8);
+            if (buf.length > MAX_PAYLOAD_LENGTH) {
+                payload += "... (truncated)";
+            }
+            return payload.replaceAll("[\\r\\n\\t]+", " ");
         }
     }
 
@@ -225,13 +235,22 @@ public class HttpLoggingFilter implements Filter {
 
         int length = Math.min(buf.length, MAX_PAYLOAD_LENGTH);
         try {
-            String payload = new String(buf, 0, length, response.getCharacterEncoding());
+            String encoding = response.getCharacterEncoding();
+            if (encoding == null || encoding.isEmpty()) {
+                encoding = StandardCharsets.UTF_8.name();
+            }
+            String payload = new String(buf, 0, length, encoding);
             if (buf.length > MAX_PAYLOAD_LENGTH) {
                 payload += "... (truncated)";
             }
-            return payload;
+            // 将换行符、回车符、制表符替换为空格，保持单行
+            return payload.replaceAll("[\\r\\n\\t]+", " ");
         } catch (UnsupportedEncodingException e) {
-            return "[Unknown Encoding]";
+            String payload = new String(buf, 0, length, StandardCharsets.UTF_8);
+            if (buf.length > MAX_PAYLOAD_LENGTH) {
+                payload += "... (truncated)";
+            }
+            return payload.replaceAll("[\\r\\n\\t]+", " ");
         }
     }
 
