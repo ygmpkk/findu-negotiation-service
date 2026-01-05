@@ -43,6 +43,25 @@
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
+
+        <!-- 文件输出 - 请求日志 -->
+        <RollingFile name="PublicRollingFile" fileName="${LOG_HOME}/public.log"
+                     filePattern="${LOG_HOME}/public-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <!-- 基于时间的滚动策略 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <!-- 基于文件大小的滚动策略 -->
+                <SizeBasedTriggeringPolicy size="${LOG_FILE_SIZE}"/>
+            </Policies>
+            <!-- 保留的文件数量 -->
+            <DefaultRolloverStrategy max="${LOG_FILE_COUNT}">
+                <Delete basePath="${LOG_HOME}" maxDepth="1">
+                    <IfFileName glob="public-*.log.gz"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
     </Appenders>
 
     <Loggers>
@@ -54,6 +73,7 @@
         </AsyncLogger>
 
         <AsyncLogger name="com.findu.negotiation" level="INFO" additivity="false" includeLocation="false">
+            <AppenderRef ref="PublicRollingFile"/>
             <AppenderRef ref="RollingFile"/>
             <AppenderRef ref="ErrorFile"/>
         </AsyncLogger>

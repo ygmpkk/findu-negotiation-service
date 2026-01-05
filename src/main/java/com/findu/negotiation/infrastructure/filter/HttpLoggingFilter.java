@@ -128,7 +128,7 @@ public class HttpLoggingFilter implements Filter {
         logMessage.append("path=").append(path).append("||");
         logMessage.append("status_code=").append(status).append("||");
 //        logMessage.append("headers=").append(formatHeaders(headers)).append("||");
-        logMessage.append("resp=").append(responseBody).append("||");
+//        logMessage.append("resp=").append(responseBody).append("||");
         logMessage.append("proc_time=").append(duration);
 
         LOGGER.info(logMessage.toString());
@@ -204,24 +204,11 @@ public class HttpLoggingFilter implements Filter {
         }
 
         int length = Math.min(buf.length, MAX_PAYLOAD_LENGTH);
-        try {
-            String encoding = request.getCharacterEncoding();
-            if (encoding == null || encoding.isEmpty()) {
-                encoding = StandardCharsets.UTF_8.name();
-            }
-            String payload = new String(buf, 0, length, encoding);
-            if (buf.length > MAX_PAYLOAD_LENGTH) {
-                payload += "... (truncated)";
-            }
-            // 将换行符、回车符、制表符替换为空格，保持单行
-            return payload.replaceAll("[\\r\\n\\t]+", " ");
-        } catch (UnsupportedEncodingException e) {
-            String payload = new String(buf, 0, length, StandardCharsets.UTF_8);
-            if (buf.length > MAX_PAYLOAD_LENGTH) {
-                payload += "... (truncated)";
-            }
-            return payload.replaceAll("[\\r\\n\\t]+", " ");
+        String payload = new String(buf, 0, length, StandardCharsets.UTF_8);
+        if (buf.length > MAX_PAYLOAD_LENGTH) {
+            payload += "... (truncated)";
         }
+        return payload;
     }
 
     /**
@@ -234,24 +221,11 @@ public class HttpLoggingFilter implements Filter {
         }
 
         int length = Math.min(buf.length, MAX_PAYLOAD_LENGTH);
-        try {
-            String encoding = response.getCharacterEncoding();
-            if (encoding == null || encoding.isEmpty()) {
-                encoding = StandardCharsets.UTF_8.name();
-            }
-            String payload = new String(buf, 0, length, encoding);
-            if (buf.length > MAX_PAYLOAD_LENGTH) {
-                payload += "... (truncated)";
-            }
-            // 将换行符、回车符、制表符替换为空格，保持单行
-            return payload.replaceAll("[\\r\\n\\t]+", " ");
-        } catch (UnsupportedEncodingException e) {
-            String payload = new String(buf, 0, length, StandardCharsets.UTF_8);
-            if (buf.length > MAX_PAYLOAD_LENGTH) {
-                payload += "... (truncated)";
-            }
-            return payload.replaceAll("[\\r\\n\\t]+", " ");
+        String payload = new String(buf, 0, length, StandardCharsets.UTF_8);
+        if (buf.length > MAX_PAYLOAD_LENGTH) {
+            payload += "... (truncated)";
         }
+        return payload;
     }
 
     /**
