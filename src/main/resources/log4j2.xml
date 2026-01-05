@@ -46,6 +46,13 @@
     </Appenders>
 
     <Loggers>
+        <!-- HTTP请求响应日志记录器 -->
+        <AsyncLogger name="com.findu.negotiation.infrastructure.filter.HttpLoggingFilter" level="INFO" additivity="false" includeLocation="false">
+<!--            <AppenderRef ref="Console"/>-->
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="ErrorFile"/>
+        </AsyncLogger>
+
         <AsyncLogger name="com.findu.negotiation" level="INFO" additivity="false" includeLocation="false">
             <AppenderRef ref="RollingFile"/>
             <AppenderRef ref="ErrorFile"/>
