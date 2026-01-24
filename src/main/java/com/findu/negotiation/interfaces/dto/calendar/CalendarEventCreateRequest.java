@@ -15,6 +15,8 @@ public class CalendarEventCreateRequest {
     @NotBlank(message = "summary不能为空")
     private String summary;
 
+    private String location;
+
     private String description;
 
     @NotBlank(message = "startTime不能为空")

@@ -1,27 +1,15 @@
 package com.findu.negotiation.interfaces.dto.calendar;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public class CalendarAppointmentRequest {
+public class CalendarScheduleRequest {
     @NotBlank(message = "providerId不能为空")
     private String providerId;
-
-    @NotBlank(message = "customerId不能为空")
-    private String customerId;
-
-    @NotBlank(message = "demandId不能为空")
-    private String demandId;
-
-    private String calendarId;
-
-    @NotBlank(message = "summary不能为空")
-    private String summary;
-
-    private String location;
-
-    private String description;
 
     @NotBlank(message = "startTime不能为空")
     private String startTime;
@@ -32,4 +20,19 @@ public class CalendarAppointmentRequest {
     private String timezone;
 
     private String userIdType;
+
+    private String calendarId;
+
+    private ViewerRole viewerRole = ViewerRole.STUDENT;
+
+    @Valid
+    private List<TimeRangeRequest> workingRanges;
+
+    @Valid
+    private List<PricingRuleRequest> pricingRules;
+
+    public enum ViewerRole {
+        COACH,
+        STUDENT
+    }
 }

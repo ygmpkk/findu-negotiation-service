@@ -27,6 +27,13 @@ public class CalendarController {
         return ApiResponse.success(calendarBizService.getFreeBusy(request));
     }
 
+    @PostMapping("/schedule")
+    public ApiResponse<CalendarScheduleResponse> getSchedule(@Valid @RequestBody CalendarScheduleRequest request) {
+        LOGGER.info("获取教练可预约日历: providerId={}, viewerRole={}",
+            request.getProviderId(), request.getViewerRole());
+        return ApiResponse.success(calendarBizService.getSchedule(request));
+    }
+
     @PostMapping("/calendars")
     public ApiResponse<CalendarCreateResponse> createCalendar(@Valid @RequestBody CalendarCreateRequest request) {
         LOGGER.info("创建飞书日历: summary={}", request.getSummary());

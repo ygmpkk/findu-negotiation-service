@@ -3,6 +3,8 @@ package com.findu.negotiation.application;
 import com.findu.negotiation.interfaces.dto.calendar.*;
 
 public interface CalendarBizService {
+    CalendarScheduleResponse getSchedule(CalendarScheduleRequest request);
+
     CalendarFreeBusyResponse getFreeBusy(CalendarFreeBusyRequest request);
 
     CalendarCreateResponse createCalendar(CalendarCreateRequest request);
