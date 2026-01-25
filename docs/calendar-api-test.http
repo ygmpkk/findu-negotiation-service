@@ -1,0 +1,351 @@
+### ============================================
+### Calendar API 测试脚本
+### ============================================
+### 使用说明：
+### 1. 在 IntelliJ IDEA 中，点击请求旁边的绿色三角即可执行
+### 2. 或者使用 REST Client 插件
+### 3. 替换 BASE_URL 为实际服务地址
+### ============================================
+
+@BASE_URL = http://localhost:8810
+@PROVIDER_ID = provider_001
+@CALENDAR_ID = {{calendar_data.calendarId}}
+@EVENT_ID = {{event_response.data.eventId}}
+@ATTENDEE_ID = {{attendee_response.data.attendeeId}}
+
+### ============================================
+### 1. Calendar API
+### ============================================
+
+### 1.1 创建日历
+POST {{BASE_URL}}/api/v1/calendars
+Content-Type: application/json
+
+{
+  "providerId": "{{PROVIDER_ID}}",
+  "name": "我的工作日历",
+  "description": "用于管理工作安排的日历",
+  "timezone": "Asia/Shanghai"
+}
+
+> {%
+    client.test("创建日历成功", function() {
+        client.assert(response.status === 200, "状态码应为200");
+        client.assert(response.body.code === 0, "业务码应为0");
+        client.assert(response.body.data.calendarId != null, "应返回calendarId");
+    });
+    client.global.set("calendar_response", response.body);
+%}
+
+### 1.2 获取日历详情
+GET {{BASE_URL}}/api/v1/calendars/{{CALENDAR_ID}}
+
+### 1.3 获取服务提供方的所有日历
+GET {{BASE_URL}}/api/v1/calendars/provider/{{PROVIDER_ID}}
+
+> {%
+    client.global.set("calendar_data", response.body.data[0]);
+%}
+
+### 1.4 获取服务提供方的激活日历列表
+GET {{BASE_URL}}/api/v1/calendars/provider/{{PROVIDER_ID}}/active
+
+### 1.5 获取闲忙日历 - 查询当天的闲忙状态
+GET {{BASE_URL}}/api/v1/calendars/provider/{{PROVIDER_ID}}/freebusy
+    ?startTime=2026-02-01T00:00:00
+    &endTime=2026-02-26T00:00:00
+    &timezone=Asia/Shanghai
+
+> {%
+    client.test("获取闲忙日历成功", function() {
+        client.assert(response.status === 200, "状态码应为200");
+        client.assert(response.body.code === 0, "业务码应为0");
+        client.assert(response.body.data != null, "应返回闲忙数据");
+    });
+%}
+
+### 1.6 获取闲忙日历 - 查询指定日期范围的闲忙状态
+GET {{BASE_URL}}/api/v1/calendars/provider/{{PROVIDER_ID}}/freebusy
+    ?startTime=2026-01-25T00:00:00
+    &endTime=2026-01-31T23:59:59
+    &timezone=Asia/Shanghai
+
+### 1.7 获取闲忙日历 - 查询一周的闲忙状态
+GET {{BASE_URL}}/api/v1/calendars/provider/{{PROVIDER_ID}}/freebusy
+    ?startTime=2026-01-25T00:00:00
+    &endTime=2026-02-01T00:00:00
+    &timezone=Asia/Shanghai
+
+### 1.8 更新日历
+PUT {{BASE_URL}}/api/v1/calendars/{{CALENDAR_ID}}
+Content-Type: application/json
+
+{
+  "name": "我的工作日历（已更新）",
+  "description": "更新后的描述",
+  "timezone": "Asia/Shanghai",
+  "status": 1
+}
+
+### 1.9 删除日历
+DELETE {{BASE_URL}}/api/v1/calendars/{{CALENDAR_ID}}
+
+### ============================================
+### 2. Event API
+### ============================================
+
+### 2.1 创建日程 - 精确时间事件
+POST {{BASE_URL}}/api/v1/calendars/events
+Content-Type: application/json
+
+{
+  "calendarId": "{{CALENDAR_ID}}",
+  "title": "客户会议",
+  "description": "与客户讨论项目需求",
+  "visibility": 1,
+  "eventType": 0,
+  "startTime": "2026-02-01T14:00:00",
+  "endTime": "2026-02-01T15:00:00",
+  "timezone": "Asia/Shanghai",
+  "reminders": [
+    { "minutes": 15 }
+  ],
+  "location": {
+    "name": "会议室A",
+    "address": "上海市浦东新区世纪大道100号",
+    "latitude": 31.2304,
+    "longitude": 121.4737
+  }
+}
+
+> {%
+    client.test("创建日程成功", function() {
+        client.assert(response.status === 200, "状态码应为200");
+        client.assert(response.body.code === 0, "业务码应为0");
+        client.assert(response.body.data.eventId != null, "应返回eventId");
+    });
+    client.global.set("event_response", response.body);
+%}
+
+### 2.2 创建日程 - 全天事件
+POST {{BASE_URL}}/api/v1/calendars/events
+Content-Type: application/json
+
+{
+  "calendarId": "{{CALENDAR_ID}}",
+  "title": "团队建设活动",
+  "description": "公司年度团队建设",
+  "visibility": 0,
+  "eventType": 0,
+  "startTime": "2026-02-15T00:00:00",
+  "endTime": "2026-02-16T00:00:00",
+  "timezone": "Asia/Shanghai",
+  "location": {
+    "name": "崇明岛度假村"
+  }
+}
+
+### 2.3 创建日程 - 重复事件
+POST {{BASE_URL}}/api/v1/calendars/events
+Content-Type: application/json
+
+{
+  "calendarId": "{{CALENDAR_ID}}",
+  "title": "每周团队例会",
+  "description": "每周一上午的团队例会",
+  "visibility": 1,
+  "eventType": 1,
+  "recurrence": "FREQ=WEEKLY;BYDAY=MO;COUNT=10",
+  "startTime": {
+    "timestamp": "2026-02-02T10:00:00",
+    "timezone": "Asia/Shanghai"
+  },
+  "endTime": {
+    "timestamp": "2026-02-02T11:00:00",
+    "timezone": "Asia/Shanghai"
+  },
+  "reminders": [
+    { "minutes": 30 }
+  ],
+  "location": {
+    "name": "会议室B"
+  }
+}
+
+### 2.4 获取日程详情
+GET {{BASE_URL}}/api/v1/calendars/events/{{EVENT_ID}}
+
+### 2.5 获取日历中的所有日程
+GET {{BASE_URL}}/api/v1/calendars/events/calendar/{{CALENDAR_ID}}
+
+### 2.6 更新日程
+PUT {{BASE_URL}}/api/v1/calendars/events/{{EVENT_ID}}
+Content-Type: application/json
+
+{
+  "title": "客户会议（已更新）",
+  "description": "更新后的会议描述",
+  "visibility": 1,
+  "startTime": {
+    "timestamp": "2026-02-01T15:00:00",
+    "timezone": "Asia/Shanghai"
+  },
+  "endTime": {
+    "timestamp": "2026-02-01T16:00:00",
+    "timezone": "Asia/Shanghai"
+  },
+  "reminders": [
+    { "minutes": 30 }
+  ],
+  "location": {
+    "name": "会议室C"
+  }
+}
+
+### 2.7 删除日程
+DELETE {{BASE_URL}}/api/v1/calendars/events/{{EVENT_ID}}
+
+### ============================================
+### 3. Attendee API
+### ============================================
+
+### 3.1 添加参与人 - 必需参与者
+POST {{BASE_URL}}/api/v1/calendars/attendees
+Content-Type: application/json
+
+{
+  "eventId": "{{EVENT_ID}}",
+  "customerId": "customer_001",
+  "role": 0,
+  "rsvpStatus": 0
+}
+
+> {%
+    client.test("添加参与人成功", function() {
+        client.assert(response.status === 200, "状态码应为200");
+        client.assert(response.body.code === 0, "业务码应为0");
+        client.assert(response.body.data.attendeeId != null, "应返回attendeeId");
+    });
+    client.global.set("attendee_response", response.body);
+%}
+
+### 3.2 添加参与人 - 可选参与者
+POST {{BASE_URL}}/api/v1/calendars/attendees
+Content-Type: application/json
+
+{
+  "eventId": "{{EVENT_ID}}",
+  "customerId": "customer_002",
+  "role": 1,
+  "rsvpStatus": 0
+}
+
+### 3.3 添加参与人 - 已接受状态
+POST {{BASE_URL}}/api/v1/calendars/attendees
+Content-Type: application/json
+
+{
+  "eventId": "{{EVENT_ID}}",
+  "customerId": "customer_003",
+  "role": 0,
+  "rsvpStatus": 1
+}
+
+### 3.4 获取参与人详情
+GET {{BASE_URL}}/api/v1/calendars/attendees/{{ATTENDEE_ID}}
+
+### 3.5 获取日程的所有参与人
+GET {{BASE_URL}}/api/v1/calendars/attendees/event/{{EVENT_ID}}
+
+### 3.6 更新参与人 RSVP 状态 - 接受
+PATCH {{BASE_URL}}/api/v1/calendars/attendees/{{ATTENDEE_ID}}/rsvp?status=1
+
+### 3.7 更新参与人 RSVP 状态 - 拒绝
+PATCH {{BASE_URL}}/api/v1/calendars/attendees/{{ATTENDEE_ID}}/rsvp?status=2
+
+### 3.8 更新参与人
+PUT {{BASE_URL}}/api/v1/calendars/attendees/{{ATTENDEE_ID}}
+Content-Type: application/json
+
+{
+  "rsvpStatus": 1
+}
+
+### 3.9 移除参与人
+DELETE {{BASE_URL}}/api/v1/calendars/attendees/{{ATTENDEE_ID}}?eventId={{EVENT_ID}}
+
+### ============================================
+### 4. 完整业务流程测试
+### ============================================
+
+### 4.1 完整流程：创建日历 -> 创建日程 -> 添加参与人
+POST {{BASE_URL}}/api/v1/calendars
+Content-Type: application/json
+
+{
+  "providerId": "provider_002",
+  "name": "项目日历",
+  "description": "项目相关会议和里程碑",
+  "timezone": "Asia/Shanghai"
+}
+
+### 创建项目启动会议日程
+POST {{BASE_URL}}/api/v1/calendars/events
+Content-Type: application/json
+
+{
+  "calendarId": "CALENDAR_ID_FROM_ABOVE",
+  "title": "项目启动会议",
+  "description": "讨论项目目标和时间表",
+  "visibility": 1,
+  "eventType": 0,
+  "startTime": {
+    "timestamp": "2026-03-01T09:00:00",
+    "timezone": "Asia/Shanghai"
+  },
+  "endTime": {
+    "timestamp": "2026-03-01T10:30:00",
+    "timezone": "Asia/Shanghai"
+  },
+  "reminders": [
+    { "day": 1 },
+    { "hour": 1 }
+  ],
+  "location": {
+    "name": "主会议室",
+    "address": "上海市浦东新区"
+  }
+}
+
+### 添加项目经理
+POST {{BASE_URL}}/api/v1/calendars/attendees
+Content-Type: application/json
+
+{
+  "eventId": "EVENT_ID_FROM_ABOVE",
+  "customerId": "pm_001",
+  "role": 0,
+  "rsvpStatus": 1
+}
+
+### 添加技术负责人
+POST {{BASE_URL}}/api/v1/calendars/attendees
+Content-Type: application/json
+
+{
+  "eventId": "EVENT_ID_FROM_ABOVE",
+  "customerId": "tech_lead_001",
+  "role": 0,
+  "rsvpStatus": 1
+}
+
+### 添加产品经理（可选）
+POST {{BASE_URL}}/api/v1/calendars/attendees
+Content-Type: application/json
+
+{
+  "eventId": "EVENT_ID_FROM_ABOVE",
+  "customerId": "po_001",
+  "role": 1,
+  "rsvpStatus": 0
+}

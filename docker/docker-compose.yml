@@ -1,0 +1,62 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Use platform for better compatibility
+        PLATFORM: linux/amd64
+
+    volumes:
+      - ../..:/workspaces:cached
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+
+    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
+    network_mode: service:mysql
+
+    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+
+    # Environment variables for the application
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3307
+
+    # Depends on mysql
+    depends_on:
+      - mysql
+
+  mysql:
+    # MySQL 8 with ARM64 support (official mysql image supports multi-arch since 8.0)
+    image: mysql:8.0
+
+    restart: unless-stopped
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: findu_negotiation
+      MYSQL_USER: negotiation_user
+      MYSQL_PASSWORD: negotiation_pass
+
+    # Add "forwardPorts": ["3306"] to **devcontainer.json** to forward MySQL locally.
+    # Adding the "ports" property to this file will not forward from a Codespace.
+
+    # MySQL configuration for better performance and compatibility
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
+
+    ports:
+      - "3307:3306"
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql-data:

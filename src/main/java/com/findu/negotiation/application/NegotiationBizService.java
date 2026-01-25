@@ -1,8 +1,6 @@
 package com.findu.negotiation.application;
 
-import com.findu.negotiation.domain.entity.NegotiationEntity;
-import com.findu.negotiation.interfaces.dto.CreateNegotiationRequest;
-import com.findu.negotiation.interfaces.dto.CreateNegotiationResponse;
+import com.findu.negotiation.domain.negotiation.entity.NegotiationEntity;
 
 public interface NegotiationBizService {
     /**

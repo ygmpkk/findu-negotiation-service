@@ -1,12 +1,12 @@
 package com.findu.negotiation.interfaces.controller;
 
 import com.findu.negotiation.application.NegotiationBizService;
-import com.findu.negotiation.domain.entity.NegotiationEntity;
+import com.findu.negotiation.domain.negotiation.entity.NegotiationEntity;
 import com.findu.negotiation.infrastructure.exception.BusinessException;
 import com.findu.negotiation.infrastructure.exception.ErrorCode;
-import com.findu.negotiation.interfaces.dto.CreateNegotiationRequest;
+import com.findu.negotiation.interfaces.dto.negotiation.CreateNegotiationRequest;
 import com.findu.negotiation.interfaces.dto.ApiResponse;
-import com.findu.negotiation.interfaces.dto.CreateNegotiationResponse;
+import com.findu.negotiation.interfaces.dto.negotiation.CreateNegotiationResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

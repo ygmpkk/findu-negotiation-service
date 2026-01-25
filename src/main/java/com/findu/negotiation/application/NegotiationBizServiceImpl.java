@@ -1,8 +1,8 @@
 package com.findu.negotiation.application;
 
-import com.findu.negotiation.domain.entity.NegotiationEntity;
-import com.findu.negotiation.domain.vo.NegotiationResultSchemaVO;
-import com.findu.negotiation.domain.vo.ProductInfoVO;
+import com.findu.negotiation.domain.negotiation.entity.NegotiationEntity;
+import com.findu.negotiation.domain.negotiation.vo.NegotiationResultSchemaVO;
+import com.findu.negotiation.domain.negotiation.vo.ProductInfoVO;
 import com.findu.negotiation.infrastructure.client.ChatClient;
 import com.findu.negotiation.infrastructure.client.DmsClient;
 import com.findu.negotiation.infrastructure.client.OrderNegotiationAgentClient;

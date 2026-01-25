@@ -1,6 +1,8 @@
 package com.findu.negotiation.domain.vo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.findu.negotiation.domain.negotiation.vo.NegotiationResultVO;
+import com.findu.negotiation.domain.negotiation.vo.ProductInfoVO;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;

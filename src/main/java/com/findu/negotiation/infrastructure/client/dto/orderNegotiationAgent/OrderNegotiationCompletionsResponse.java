@@ -1,7 +1,7 @@
 package com.findu.negotiation.infrastructure.client.dto.orderNegotiationAgent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.findu.negotiation.domain.vo.NegotiationResultVO;
+import com.findu.negotiation.domain.negotiation.vo.NegotiationResultVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
