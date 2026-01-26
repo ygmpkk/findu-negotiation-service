@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.findu.negotiation.infrastructure.mapper.AttendeeMapper">
+
+    <!-- Result Map -->
+    <resultMap id="AttendeeResultMap" type="com.findu.negotiation.domain.calendar.entity.AttendeeEntity">
+        <id property="id" column="id"/>
+        <result property="attendeeId" column="attendee_id"/>
+        <result property="eventId" column="event_id"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="role" column="role"/>
+        <result property="rsvpStatus" column="rsvp_status"/>
+        <result property="gmtCreate" column="gmt_create"/>
+    </resultMap>
+
+    <!-- Base Columns -->
+    <sql id="Base_Column_List">
+        id, attendee_id, event_id, customer_id, role, rsvp_status, gmt_create
+    </sql>
+
+    <!-- Insert Attendee -->
+    <insert id="insert" parameterType="com.findu.negotiation.domain.calendar.entity.AttendeeEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO attendee (
+            attendee_id, event_id, customer_id, role, rsvp_status, gmt_create
+        ) VALUES (
+            #{attendeeId}, #{eventId}, #{customerId}, #{role}, #{rsvpStatus}, NOW()
+        )
+    </insert>
+
+    <!-- Update Attendee -->
+    <update id="update" parameterType="com.findu.negotiation.domain.calendar.entity.AttendeeEntity">
+        UPDATE attendee
+        <set>
+            <if test="role != null">role = #{role},</if>
+            <if test="rsvpStatus != null">rsvp_status = #{rsvpStatus},</if>
+        </set>
+        WHERE attendee_id = #{attendeeId}
+    </update>
+
+    <!-- Insert Batch -->
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO attendee (
+            attendee_id, event_id, customer_id, role, rsvp_status, gmt_create
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+        (#{item.attendeeId}, #{item.eventId}, #{item.customerId}, #{item.role}, #{item.rsvpStatus}, NOW())
+        </foreach>
+    </insert>
+
+    <!-- Find By Id -->
+    <select id="findById" parameterType="string" resultMap="AttendeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM attendee
+        WHERE attendee_id = #{attendeeId}
+    </select>
+
+    <!-- Find By Event Id -->
+    <select id="findByEventId" parameterType="string" resultMap="AttendeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM attendee
+        WHERE event_id = #{eventId}
+        ORDER BY gmt_create ASC
+    </select>
+
+    <!-- Find By Customer Id -->
+    <select id="findByCustomerId" parameterType="string" resultMap="AttendeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM attendee
+        WHERE customer_id = #{customerId}
+        ORDER BY gmt_create DESC
+    </select>
+
+    <!-- Find By Event Id And Customer Id -->
+    <select id="findByEventIdAndCustomerId" resultMap="AttendeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM attendee
+        WHERE event_id = #{eventId}
+          AND customer_id = #{customerId}
+    </select>
+
+    <!-- Find By Event Id And Rsvp Status -->
+    <select id="findByEventIdAndRsvpStatus" resultMap="AttendeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM attendee
+        WHERE event_id = #{eventId}
+          AND rsvp_status = #{status}
+        ORDER BY gmt_create ASC
+    </select>
+
+    <!-- Find By Event Id And Role -->
+    <select id="findByEventIdAndRole" resultMap="AttendeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM attendee
+        WHERE event_id = #{eventId}
+          AND role = #{role}
+        ORDER BY gmt_create ASC
+    </select>
+
+    <!-- Delete By Id -->
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM attendee
+        WHERE attendee_id = #{attendeeId}
+    </delete>
+
+    <!-- Delete All By Event Id -->
+    <delete id="deleteAllByEventId" parameterType="string">
+        DELETE FROM attendee
+        WHERE event_id = #{eventId}
+    </delete>
+
+    <!-- Delete Batch -->
+    <delete id="deleteBatch" parameterType="java.util.List">
+        DELETE FROM attendee
+        WHERE attendee_id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!-- Exists By Id -->
+    <select id="existsById" parameterType="string" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM attendee
+        WHERE attendee_id = #{attendeeId}
+    </select>
+
+    <!-- Exists By Event Id And Customer Id -->
+    <select id="existsByEventIdAndCustomerId" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM attendee
+        WHERE event_id = #{eventId}
+          AND customer_id = #{customerId}
+    </select>
+
+    <!-- Count By Event Id -->
+    <select id="countByEventId" parameterType="string" resultType="long">
+        SELECT COUNT(1)
+        FROM attendee
+        WHERE event_id = #{eventId}
+    </select>
+
+    <!-- Count Accepted By Event Id -->
+    <select id="countAcceptedByEventId" parameterType="string" resultType="long">
+        SELECT COUNT(1)
+        FROM attendee
+        WHERE event_id = #{eventId}
+          AND rsvp_status = 1
+    </select>
+
+</mapper>

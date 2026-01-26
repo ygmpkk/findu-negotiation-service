@@ -9,6 +9,7 @@ public enum ErrorCode {
 
     PROVIDER_ID_REQUIRED(40001, "providerId不能为空"),
     CUSTOMER_ID_REQUIRED(40002, "customerId不能为空"),
+
     DMS_SERVICE_ERROR(50001, "调用DMS服务失败"),
     USER_SERVICE_ERROR(50002, "调用User服务失败"),
     AGENT_SERVICE_ERROR(50003, "调用协商Agent服务失败");

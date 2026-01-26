@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.findu.negotiation.infrastructure.mapper.EventMapper">
+
+    <!-- Result Map -->
+    <resultMap id="EventResultMap" type="com.findu.negotiation.domain.calendar.entity.EventEntity">
+        <id property="id" column="id"/>
+        <result property="eventId" column="event_id"/>
+        <result property="calendarId" column="calendar_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="visibility" column="visibility"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="timezone" column="timezone"/>
+        <result property="eventType" column="event_type"/>
+        <result property="recurrence" column="recurrence"/>
+        <result property="status" column="status"/>
+        <result property="freeBusyStatus" column="free_busy_status"/>
+        <result property="isException" column="is_exception"/>
+        <result property="recurringEventId" column="recurring_event_id"/>
+        <result property="reminderVOS" column="reminders" typeHandler="com.findu.negotiation.infrastructure.handler.ReminderListTypeHandler"/>
+        <result property="locationVO" column="location" typeHandler="com.findu.negotiation.infrastructure.handler.LocationTypeHandler"/>
+        <result property="gmtCreate" column="gmt_create"/>
+        <result property="gmtModify" column="gmt_modify"/>
+    </resultMap>
+
+    <!-- Base Columns -->
+    <sql id="Base_Column_List">
+        id, event_id, calendar_id, title, description, visibility,
+        start_time, end_time, timezone, event_type, recurrence, status, free_busy_status,
+        is_exception, recurring_event_id, reminders, location,
+        gmt_create, gmt_modify
+    </sql>
+
+    <!-- Insert Event -->
+    <insert id="insert" parameterType="com.findu.negotiation.domain.calendar.entity.EventEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO event (
+            event_id, calendar_id, title, description, visibility,
+            start_time, end_time, timezone, event_type, recurrence, status, free_busy_status,
+            is_exception, recurring_event_id, reminders, location,
+            gmt_create, gmt_modify
+        ) VALUES (
+            #{eventId}, #{calendarId}, #{title}, #{description}, #{visibility},
+            #{startTime}, #{endTime}, #{timezone}, #{eventType}, #{recurrence}, #{status}, #{freeBusyStatus},
+            #{isException}, #{recurringEventId},
+            #{reminderVOS, typeHandler=com.findu.negotiation.infrastructure.handler.ReminderListTypeHandler},
+            #{locationVO, typeHandler=com.findu.negotiation.infrastructure.handler.LocationTypeHandler},
+            NOW(), NOW()
+        )
+    </insert>
+
+    <!-- Insert Selective (only insert non-null fields) -->
+    <insert id="insertSelective" parameterType="com.findu.negotiation.domain.calendar.entity.EventEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO event
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="eventId != null">event_id,</if>
+            <if test="calendarId != null">calendar_id,</if>
+            <if test="title != null">title,</if>
+            <if test="description != null">description,</if>
+            <if test="visibility != null">visibility,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="timezone != null">timezone,</if>
+            <if test="eventType != null">event_type,</if>
+            <if test="recurrence != null">recurrence,</if>
+            <if test="status != null">status,</if>
+            <if test="freeBusyStatus != null">free_busy_status,</if>
+            <if test="isException != null">is_exception,</if>
+            <if test="recurringEventId != null">recurring_event_id,</if>
+            <if test="reminderVOS != null">reminders,</if>
+            <if test="locationVO != null">location,</if>
+            gmt_create, gmt_modify
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="eventId != null">#{eventId},</if>
+            <if test="calendarId != null">#{calendarId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="visibility != null">#{visibility},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="timezone != null">#{timezone},</if>
+            <if test="eventType != null">#{eventType},</if>
+            <if test="recurrence != null">#{recurrence},</if>
+            <if test="status != null">#{status},</if>
+            <if test="freeBusyStatus != null">#{freeBusyStatus},</if>
+            <if test="isException != null">#{isException},</if>
+            <if test="recurringEventId != null">#{recurringEventId},</if>
+            <if test="reminderVOS != null">#{reminderVOS, typeHandler=com.findu.negotiation.infrastructure.handler.ReminderListTypeHandler},</if>
+            <if test="locationVO != null">#{locationVO, typeHandler=com.findu.negotiation.infrastructure.handler.LocationTypeHandler},</if>
+            NOW(), NOW()
+        </trim>
+    </insert>
+
+    <!-- Update Event -->
+    <update id="update" parameterType="com.findu.negotiation.domain.calendar.entity.EventEntity">
+        UPDATE event
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="visibility != null">visibility = #{visibility},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="timezone != null">timezone = #{timezone},</if>
+            <if test="eventType != null">event_type = #{eventType},</if>
+            <if test="recurrence != null">recurrence = #{recurrence},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="freeBusyStatus != null">free_busy_status = #{freeBusyStatus},</if>
+            <if test="isException != null">is_exception = #{isException},</if>
+            <if test="recurringEventId != null">recurring_event_id = #{recurringEventId},</if>
+            <if test="reminderVOS != null">reminders = #{reminderVOS, typeHandler=com.findu.negotiation.infrastructure.handler.ReminderListTypeHandler},</if>
+            <if test="locationVO != null">location = #{locationVO, typeHandler=com.findu.negotiation.infrastructure.handler.LocationTypeHandler},</if>
+            gmt_modify = NOW()
+        </set>
+        WHERE event_id = #{eventId}
+    </update>
+
+    <!-- Insert Batch -->
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO event (
+            event_id, calendar_id, title, description, visibility,
+            start_time, end_time, timezone, event_type, recurrence, status, free_busy_status,
+            is_exception, recurring_event_id, reminders, location,
+            gmt_create, gmt_modify
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+        (
+            #{item.eventId}, #{item.calendarId}, #{item.title}, #{item.description}, #{item.visibility},
+            #{item.startTime}, #{item.endTime}, #{item.timezone}, #{item.eventType}, #{item.recurrence}, #{item.status}, #{item.freeBusyStatus},
+            #{item.isException}, #{item.recurringEventId},
+            #{item.reminderVOS, typeHandler=com.findu.negotiation.infrastructure.handler.ReminderListTypeHandler},
+            #{item.locationVO, typeHandler=com.findu.negotiation.infrastructure.handler.LocationTypeHandler},
+            NOW(), NOW()
+        )
+        </foreach>
+    </insert>
+
+    <!-- Find By Id -->
+    <select id="findById" parameterType="string" resultMap="EventResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM event
+        WHERE event_id = #{eventId}
+    </select>
+
+    <!-- Find By Calendar Id -->
+    <select id="findByCalendarId" parameterType="string" resultMap="EventResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM event
+        WHERE calendar_id = #{calendarId}
+        ORDER BY gmt_create DESC
+    </select>
+
+    <!-- Find By Calendar Id And Status -->
+    <select id="findByCalendarIdAndStatus" resultMap="EventResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM event
+        WHERE calendar_id = #{calendarId}
+          AND status = #{status}
+        ORDER BY gmt_create DESC
+    </select>
+
+    <!-- Find By Calendar Id And Event Type -->
+    <select id="findByCalendarIdAndEventType" resultMap="EventResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM event
+        WHERE calendar_id = #{calendarId}
+          AND event_type = #{eventType}
+        ORDER BY gmt_create DESC
+    </select>
+
+    <!-- Find By Calendar Id And Time Range -->
+    <select id="findByCalendarIdAndTimeRange" resultMap="EventResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM event
+        WHERE calendar_id = #{calendarId}
+          AND start_time &lt; #{endTime}
+          AND end_time > #{startTime}
+        ORDER BY start_time ASC
+    </select>
+
+    <!-- Find Scheduled By Calendar Id And Time Range -->
+    <select id="findScheduledByCalendarIdAndTimeRange" resultMap="EventResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM event
+        WHERE calendar_id = #{calendarId}
+          AND status = 0
+          AND start_time &lt; #{endTime}
+          AND end_time > #{startTime}
+        ORDER BY start_time ASC
+    </select>
+
+    <!-- Find Recurring Events -->
+    <select id="findRecurringEvents" parameterType="string" resultMap="EventResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM event
+        WHERE calendar_id = #{calendarId}
+          AND event_type = 1
+          AND is_exception = 0
+        ORDER BY gmt_create ASC
+    </select>
+
+    <!-- Find Exceptions By Recurring Event Id -->
+    <select id="findExceptionsByRecurringEventId" parameterType="string" resultMap="EventResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM event
+        WHERE recurring_event_id = #{recurringEventId}
+          AND is_exception = 1
+        ORDER BY gmt_create ASC
+    </select>
+
+    <!-- Delete By Id -->
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM event
+        WHERE event_id = #{eventId}
+    </delete>
+
+    <!-- Exists By Id -->
+    <select id="existsById" parameterType="string" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM event
+        WHERE event_id = #{eventId}
+    </select>
+
+    <!-- Exists By Event Id And Calendar Id -->
+    <select id="existsByEventIdAndCalendarId" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM event
+        WHERE event_id = #{eventId}
+          AND calendar_id = #{calendarId}
+    </select>
+
+    <!-- Delete Batch -->
+    <delete id="deleteBatch" parameterType="java.util.List">
+        DELETE FROM event
+        WHERE event_id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!-- Delete All By Calendar Id -->
+    <delete id="deleteAllByCalendarId" parameterType="string">
+        DELETE FROM event
+        WHERE calendar_id = #{calendarId}
+    </delete>
+
+</mapper>
